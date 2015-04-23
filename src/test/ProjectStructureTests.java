@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.*;
  *      - Guava
  *      - Lambda support
  */
-public class TestProjectStructure {
+public class ProjectStructureTests {
     @Test
     public void testGuava() {
         checkArgument(1 == 1);
