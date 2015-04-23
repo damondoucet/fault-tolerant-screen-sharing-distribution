@@ -1,5 +1,7 @@
 package main.network;
 
+import java.io.IOException;
+
 /**
  * Responsible for creating connections for a specific client. T is the
  * key-type of the connection.
@@ -11,7 +13,7 @@ public interface ConnectionFactory<T> {
      *      A null value indicates the caller should stop listening for
      *      connections.
      */
-    public Connection<T> acceptConnection();
+    public Connection<T> acceptConnection() throws IOException;
 
     /**
      * Creates a connection to the given key.
@@ -19,7 +21,9 @@ public interface ConnectionFactory<T> {
      * @param key The client to open the connection with.
      * @return An opened connection.
      */
-    public Connection<T> openConnection(T key);
+    public Connection<T> openConnection(T key) throws IOException;
+
+    public void close();
 
     // TODO(ddoucet): Add some methods here for rate-limiting. Latency and/or
     // throughput.

@@ -26,4 +26,8 @@ public class TestConnectionFactory implements ConnectionFactory<String> {
     public Connection<String> openConnection(String dest) {
         return manager.openConnection(client, dest);
     }
+
+    @Override
+    public void close() {
+    }
 }
