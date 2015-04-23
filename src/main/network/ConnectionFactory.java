@@ -8,10 +8,8 @@ import java.io.IOException;
  */
 public interface ConnectionFactory<T> {
     /**
-     * @return Null if the connection factory has died, otherwise a new
-     *      connection. This method blocks until a new connection has opened.
-     *      A null value indicates the caller should stop listening for
-     *      connections.
+     * @return A new connection. This method blocks until a new connection
+     *      has opened or an Exception is thrown.
      */
     public Connection<T> acceptConnection() throws IOException;
 
