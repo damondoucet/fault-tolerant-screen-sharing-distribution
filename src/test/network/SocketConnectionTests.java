@@ -1,4 +1,4 @@
-package test;
+package test.network;
 
 import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;

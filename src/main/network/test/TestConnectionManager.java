@@ -79,7 +79,7 @@ public class TestConnectionManager {
         Map<String, ConcurrentLinkedQueue<Byte>> connections = connectionData.get(source);
 
         while (!connections.containsKey(dest))
-            Util.sleep(10);
+            Util.sleepMillis(10);
 
         // Now that we have our queue to the dest, we're guaranteed there's a
         // queue from the dest to us (see createConnection).

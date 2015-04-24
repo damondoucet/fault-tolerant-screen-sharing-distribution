@@ -9,7 +9,7 @@ public class Util {
     // Disable constructor
     private Util() {}
 
-    public static void sleep(long millis) {
+    public static void sleepMillis(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
@@ -19,7 +19,7 @@ public class Util {
     public static <T> T next(ConcurrentLinkedQueue<T> queue) {
         T t;
         while ((t = queue.poll()) == null)
-            sleep(10);
+            sleepMillis(10);
         return t;
     }
 }

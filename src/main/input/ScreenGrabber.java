@@ -6,38 +6,35 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by Merry on 4/23/15.
+ * Takes screenshots at a specific frequency and outputs them to a
+ * ConcurrentLinkedQueue<BufferedImage> at a specific resolution.
  */
 public class ScreenGrabber {
-
     private Robot myRobot;
     private Rectangle screenRectangle;
     private ConcurrentLinkedQueue<BufferedImage> buffer;
     private long frequency;
     private AtomicBoolean isCapturing;
 
+    private ScreenGrabber(Robot robot,
+                          ConcurrentLinkedQueue<BufferedImage> buffer,
+                          long frequency) {
+        this.myRobot = robot;
+        this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        this.buffer = buffer;
+        this.frequency = frequency;
+        this.isCapturing = new AtomicBoolean();
+    }
 
-    /**
-     *
-     * @param buffer
-     * @param frequency in millis
-     */
-    public ScreenGrabber(ConcurrentLinkedQueue<BufferedImage> buffer, long frequency) {
-        try {
-            this.myRobot = new Robot();
-            this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-            this.buffer = buffer;
-            this.frequency = frequency;
-            this.isCapturing = new AtomicBoolean();
-        } catch (AWTException e) {
-            e.printStackTrace();
-        }
+    public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<BufferedImage> buffer,
+                                                      long frequency)
+            throws AWTException {;
+        return new ScreenGrabber(new Robot(), buffer, frequency);
     }
 
     public void startCapture() {
         this.isCapturing.set(true);
         new Thread(() -> capture()).start(); // lambda function that is coerced to be a Runnable
-
     }
 
     public void endCapture() {

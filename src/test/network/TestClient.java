@@ -1,4 +1,4 @@
-package test;
+package test.network;
 
 import main.network.Connection;
 import main.network.ConnectionFactory;
@@ -84,7 +84,7 @@ public class TestClient<T> {
                                  AtomicReference<Exception> destErr) {
         while ((source.get() == null || dest.get() == null) &&
                 sourceErr.get() == null && destErr.get() == null)
-            Util.sleep(10);
+            Util.sleepMillis(10);
 
         checkExceptions(sourceErr, destErr);
     }

@@ -1,4 +1,4 @@
-package test;
+package test.network;
 
 import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
