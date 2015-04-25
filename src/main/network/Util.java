@@ -22,4 +22,10 @@ public class Util {
             sleepMillis(10);
         return t;
     }
+
+    public static void printException(String message, Exception e) {
+        System.out.println(message);
+        System.out.println(e);
+        e.printStackTrace();
+    }
 }

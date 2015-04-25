@@ -31,6 +31,10 @@ public class SocketConnectionFactory implements ConnectionFactory<SocketInformat
         super.finalize();
     }
 
+    public SocketInformation getKey() {
+        return info;
+    }
+
     @Override
     public Connection<SocketInformation> acceptConnection() throws IOException {
         Socket socket = serverSocket.accept();

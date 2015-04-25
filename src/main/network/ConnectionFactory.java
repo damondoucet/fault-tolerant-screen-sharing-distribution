@@ -7,6 +7,8 @@ import java.io.IOException;
  * key-type of the connection.
  */
 public interface ConnectionFactory<T> {
+    public T getKey();
+
     /**
      * @return A new connection. This method blocks until a new connection
      *      has opened or an Exception is thrown.

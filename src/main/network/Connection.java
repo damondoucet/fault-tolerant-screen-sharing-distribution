@@ -1,6 +1,7 @@
 package main.network;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Interface wrapping connections. This allows us to break the dependency on
@@ -9,6 +10,13 @@ import java.io.IOException;
 public interface Connection<T> {
     public T getSource();
     public T getDest();
+
+    /**
+     * Used for reading Snapshots.
+     *
+     * @return An InputStream that can read bytes from the connection.
+     */
+    public InputStream getInputStream();
 
     /**
      * @param bytes The array to read into.

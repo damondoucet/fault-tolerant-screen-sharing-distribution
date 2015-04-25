@@ -6,6 +6,7 @@ import main.network.Util;
 import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -18,6 +19,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * wrapper around the manager.)
  */
 public class TestConnection implements Connection<String> {
+    // Wraps reading from the readQueue for getInputStream().
+    private class TestConnectionInputStream extends InputStream {
+        @Override
+        public int read() throws IOException {
+            return Util.next(readQueue);
+        }
+    }
+
     // Used for closing the other end of a connection.
     private final TestConnectionManager manager;
 
@@ -47,6 +56,11 @@ public class TestConnection implements Connection<String> {
 
     public String getDest() {
         return dest;
+    }
+
+    @Override
+    public InputStream getInputStream() {
+        return new TestConnectionInputStream();
     }
 
     @Override

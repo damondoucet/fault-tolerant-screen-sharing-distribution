@@ -17,6 +17,10 @@ public class TestConnectionFactory implements ConnectionFactory<String> {
         this.client = client;
     }
 
+    public String getKey() {
+        return client;
+    }
+
     @Override
     public Connection<String> acceptConnection() {
         return manager.acceptConnection(client);

@@ -57,6 +57,11 @@ public class SocketConnection implements Connection<SocketInformation> {
     }
 
     @Override
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    @Override
     public int read(byte[] bytes, int numBytes) throws IOException {
         return inputStream.read(bytes, 0, numBytes);
     }
