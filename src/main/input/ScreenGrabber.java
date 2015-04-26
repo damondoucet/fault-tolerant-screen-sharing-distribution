@@ -1,5 +1,7 @@
 package main.input;
 
+import main.Snapshot;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -12,12 +14,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ScreenGrabber {
     private Robot myRobot;
     private Rectangle screenRectangle;
-    private ConcurrentLinkedQueue<BufferedImage> buffer;
+    private ConcurrentLinkedQueue<Snapshot> buffer;
     private long frequency;
     private AtomicBoolean isCapturing;
+    private Snapshot mySnapshot;
 
     private ScreenGrabber(Robot robot,
-                          ConcurrentLinkedQueue<BufferedImage> buffer,
+                          ConcurrentLinkedQueue<Snapshot> buffer,
                           long frequency) {
         this.myRobot = robot;
         this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
@@ -26,7 +29,7 @@ public class ScreenGrabber {
         this.isCapturing = new AtomicBoolean();
     }
 
-    public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<BufferedImage> buffer,
+    public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
                                                       long frequency)
             throws AWTException {;
         return new ScreenGrabber(new Robot(), buffer, frequency);
@@ -46,7 +49,12 @@ public class ScreenGrabber {
             long startTimeMillis = System.currentTimeMillis();
             BufferedImage img = this.myRobot.createScreenCapture(this.screenRectangle);
             if(img != null) {
-                this.buffer.add(img);
+                if (this.mySnapshot == null) {
+                    this.mySnapshot = Snapshot.lossySnapshot(0, img);
+                    this.buffer.add(this.mySnapshot);
+                } else {
+                    this.buffer.add(this.mySnapshot.createNext(img));
+                }
             }
 
             long timeElapsed = System.currentTimeMillis() - startTimeMillis;

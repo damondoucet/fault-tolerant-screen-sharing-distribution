@@ -22,7 +22,7 @@ public class BasicNetworkProtocolBroadcaster<T> extends BasicNetworkProtocol<T> 
 
     public BasicNetworkProtocolBroadcaster(ConnectionFactory<T> connectionFactory) {
         super(connectionFactory);
-        clientList = new ClientList(connectionFactory.getKey());
+        clientList = new ClientList<T>(connectionFactory.getKey());
         snapshotQueue = new ConcurrentLinkedQueue<>();
 
         threadSet = new InterruptableThreadSet(
