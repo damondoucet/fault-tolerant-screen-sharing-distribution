@@ -1,4 +1,5 @@
 package main.imageviewer;
+import main.Snapshot;
 import main.network.Util;
 
 import java.awt.image.BufferedImage;
@@ -13,20 +14,18 @@ import static com.google.common.base.Preconditions.*;
 /**
  * Basic slide show app, adapted from Chris Bailey-Kellogg app from Dartmouth CS
  */
-public class Slideshow extends DrawingFrame implements Runnable {
-    private static final int numSlides = 4;			// number of slides
+public class Slideshow extends DrawingFrame {
+    private ConcurrentLinkedQueue<Snapshot> slides;					// images to display
 
-    private ConcurrentLinkedQueue<BufferedImage> slides;					// images to display
-
-    public Slideshow(ConcurrentLinkedQueue<BufferedImage> images) {
+    public Slideshow(ConcurrentLinkedQueue<Snapshot> images) {
         // TODO: this should be init'd with a black window
-        super("Slideshow", Util.next(images));
+        super("Slideshow", Util.next(images).getImage());
         slides = images;
 
         new Thread(() -> {
             while (true) {
-                BufferedImage img = Util.next(slides);
-                advance(img);
+                Snapshot img = Util.next(slides);
+                advance(img.getImage());
             }
         }).start();
     }
@@ -46,9 +45,9 @@ public class Slideshow extends DrawingFrame implements Runnable {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            ConcurrentLinkedQueue<BufferedImage> queue = new ConcurrentLinkedQueue<>();
+            ConcurrentLinkedQueue<Snapshot> queue = new ConcurrentLinkedQueue<>();
             new Thread(() -> {
-                Util.sleep(125);
+                Util.sleepMillis(125);
 
                 try {
                     BufferedImage[] images = new BufferedImage[3];
@@ -57,23 +56,19 @@ public class Slideshow extends DrawingFrame implements Runnable {
                     images[2] = ImageIO.read(new File("images/image3.png"));
                     checkState(images[0] != null && images[1] != null && images[2] != null);
                     int index = 0;
+                    Snapshot next = Snapshot.lossySnapshot(0, images[0]);
                     while (true) {
-                        queue.add(images[index]);
+                        queue.add(next);
                         index = (index + 1) % images.length;
-                        Util.sleep(500);
+                        next = next.createNext(images[index]);
+                        Util.sleepMillis(500);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Util.printException("Error pushing images", e);
                 }
             }).start();
 
             new Slideshow(queue);
         });
-    }
-
-    @Override
-    public void run() {
-
-
     }
 }
