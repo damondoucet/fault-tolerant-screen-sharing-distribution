@@ -59,6 +59,7 @@ public class ImageUtil {
         BufferedImage im2 = ImageIO.read(new File("image1.png"));
         ImageIO.write(im2, "PNG", new File("image1prime.png"));
         assertTrue(Snapshot.imagesEqual(im1, im2));
+
         ImageIO.write(createImage2(), "JPG", new File("image2.jpg"));
     }
 
