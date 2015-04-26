@@ -19,7 +19,7 @@ public class Slideshow extends DrawingFrame {
 
     public Slideshow(ConcurrentLinkedQueue<Snapshot> images) {
         // TODO: this should be init'd with a black window
-        super("Slideshow", Util.next(images).getImage());
+        super("Slideshow", Util.next(images).getImage(), 600, 300);
         slides = images;
 
         new Thread(() -> {
@@ -43,7 +43,7 @@ public class Slideshow extends DrawingFrame {
      * Main method for the application
      * @param args		command-line arguments (ignored)
      */
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             ConcurrentLinkedQueue<Snapshot> queue = new ConcurrentLinkedQueue<>();
             new Thread(() -> {
@@ -70,5 +70,5 @@ public class Slideshow extends DrawingFrame {
 
             new Slideshow(queue);
         });
-    }
+    }*/
 }

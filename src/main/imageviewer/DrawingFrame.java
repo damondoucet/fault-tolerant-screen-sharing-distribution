@@ -14,6 +14,8 @@ import java.io.File;
 public class DrawingFrame extends JFrame {
     public JComponent canvas;						// handles graphics display
     public BufferedImage image;						// what to draw by default
+    public int width;
+    public int height;
 
     /**
      * Just the shell -- need to call finishGUI once the size is known.
@@ -31,7 +33,7 @@ public class DrawingFrame extends JFrame {
      * @param title		displayed in window title bar
      * @param filename	for the image
      */
-    public DrawingFrame(String title, String filename) {
+    public DrawingFrame(String title, String filename, int width, int height) {
         super(title);
         try {
             image = ImageIO.read(new File(filename));
@@ -41,7 +43,9 @@ public class DrawingFrame extends JFrame {
             System.exit(-1);
         }
         createCanvas();
-        finishGUI(image.getWidth(), image.getHeight());
+        this.width = width;
+        this.height = height;
+        finishGUI(width, height);
     }
 
     /**
@@ -50,10 +54,12 @@ public class DrawingFrame extends JFrame {
      * @param title		displayed in window title bar
      * @param image
      */
-    public DrawingFrame(String title, BufferedImage image) {
+    public DrawingFrame(String title, BufferedImage image, int width, int height) {
         super(title);
+        this.width = width;
+        this.height = height;
         createCanvas();
-        finishGUI(image.getWidth(), image.getHeight());
+        finishGUI(width, height);
         setImage(image);
     }
 
@@ -67,7 +73,9 @@ public class DrawingFrame extends JFrame {
     public DrawingFrame(String title, int width, int height) {
         super(title);
         createCanvas();
-        finishGUI(width, height);
+        this.width = width;
+        this.height = height;
+        finishGUI(width, height );
     }
 
     /**
@@ -104,7 +112,7 @@ public class DrawingFrame extends JFrame {
      * @param g
      */
     public void draw(Graphics g) {
-        if (image != null) g.drawImage(image, 0, 0, null);
+        if (image != null) g.drawImage(image, 0, 0, width, height, null);
     }
 
     /**
