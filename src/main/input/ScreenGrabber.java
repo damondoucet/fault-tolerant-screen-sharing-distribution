@@ -1,6 +1,7 @@
 package main.input;
 
 import main.Snapshot;
+import org.imgscalr.Scalr;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -19,23 +20,51 @@ public class ScreenGrabber {
     private AtomicBoolean isCapturing;
     private Snapshot mySnapshot;
     private long delay; // in millis
+    private Dimension dimension;
 
     private ScreenGrabber(Robot robot,
                           ConcurrentLinkedQueue<Snapshot> buffer,
-                          long frequency) {
+                          long frequency, Dimension dimension) {
         this.myRobot = robot;
-        this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+        this.dimension = dimension;
+        this.screenRectangle = new Rectangle(this.dimension);
         this.buffer = buffer;
         this.frequency = frequency;
         this.isCapturing = new AtomicBoolean();
         this.delay = 1000 / frequency;
     }
 
+    /**
+     *
+     * Public constructor.
+     *
+     * @param buffer
+     * @param frequency
+     * @return
+     * @throws AWTException
+     */
     public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
                                                       long frequency)
-            throws AWTException {;
-        return new ScreenGrabber(new Robot(), buffer, frequency);
+            throws AWTException {
+        return new ScreenGrabber(new Robot(), buffer, frequency, Toolkit.getDefaultToolkit().getScreenSize());
     }
+
+    /**
+     *
+     * Public constructor with dimension parameter.
+     *
+     * @param buffer
+     * @param frequency
+     * @param dimension
+     * @return
+     * @throws AWTException
+     */
+    public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
+                                                      long frequency, Dimension dimension)
+            throws AWTException {;
+        return new ScreenGrabber(new Robot(), buffer, frequency, dimension);
+    }
+
 
     public void startCapture() {
         this.isCapturing.set(true);
@@ -51,6 +80,7 @@ public class ScreenGrabber {
             long startTimeMillis = System.currentTimeMillis();
             BufferedImage img = this.myRobot.createScreenCapture(this.screenRectangle);
             if(img != null) {
+                img = Scalr.resize(img, (int) this.dimension.getWidth(), (int) this.dimension.getHeight());
                 if (this.mySnapshot == null) {
                     this.mySnapshot = Snapshot.lossySnapshot(0, img);
                     this.buffer.add(this.mySnapshot);

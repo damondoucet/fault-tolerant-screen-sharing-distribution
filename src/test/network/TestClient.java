@@ -102,7 +102,7 @@ public class TestClient<T> {
 
         wait(sourceToDestRef, destToSourceRef, err1, err2);
 
-        return new ConnectionPair<T>(
+        return new ConnectionPair<>(
                 source,
                 dest,
                 sourceToDestRef.get(),
