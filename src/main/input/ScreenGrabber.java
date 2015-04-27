@@ -15,9 +15,10 @@ public class ScreenGrabber {
     private Robot myRobot;
     private Rectangle screenRectangle;
     private ConcurrentLinkedQueue<Snapshot> buffer;
-    private long frequency;
+    private long frequency; // in fps
     private AtomicBoolean isCapturing;
     private Snapshot mySnapshot;
+    private long delay; // in millis
 
     private ScreenGrabber(Robot robot,
                           ConcurrentLinkedQueue<Snapshot> buffer,
@@ -27,6 +28,7 @@ public class ScreenGrabber {
         this.buffer = buffer;
         this.frequency = frequency;
         this.isCapturing = new AtomicBoolean();
+        this.delay = 1000 / frequency;
     }
 
     public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
@@ -58,7 +60,7 @@ public class ScreenGrabber {
             }
 
             long timeElapsed = System.currentTimeMillis() - startTimeMillis;
-            long sleepTime = (this.frequency - timeElapsed > 0) ? this.frequency - timeElapsed : 0;
+            long sleepTime = (this.delay - timeElapsed > 0) ? this.delay - timeElapsed : 0;
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {

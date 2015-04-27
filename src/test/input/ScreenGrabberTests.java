@@ -21,16 +21,16 @@ public class ScreenGrabberTests {
     @Test
     public void TestBasic() throws AWTException {
         ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<Snapshot>();
-        int[] frequencies = {200, 100, 50, 30};
-        int testDuration = 2000;
-        for (int i=0; i < frequencies.length; i++) {
-            ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, frequencies[i]);
+        int[] fps = {1, 10, 20, 30};
+        int testDurationSecs = 2;
+        for (int i=0; i < fps.length; i++) {
+            ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, fps[i]);
             grabber.startCapture();
-            Util.sleepMillis(testDuration);
+            Util.sleepMillis(testDurationSecs*1000);
             grabber.endCapture();
-            System.out.println(buffer.size() + "  " + testDuration/frequencies[i]);
-            assertTrue(buffer.size() > testDuration / frequencies[i] / 1.5);
-            assertTrue(buffer.size() < testDuration / frequencies[i] + 1);
+            System.out.println(buffer.size() + "  " + testDurationSecs * fps[i]);
+            assertTrue(buffer.size() > testDurationSecs * fps[i] / 1.5);
+            assertTrue(buffer.size() < testDurationSecs * fps[i] + 1);
             buffer.clear();
         }
     }
