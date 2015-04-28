@@ -31,7 +31,7 @@ public class SocketConnectionTests {
         return TestClient.connect(sourceClient, destClient);
     }
 
-    @Test(timeout=100)
+    @Test(timeout=500)
     public void testSocketsConnect() throws IOException {
         ConnectionPair<SocketInformation> connections = createConnectionPair(PORT1, PORT2);
 
@@ -42,7 +42,7 @@ public class SocketConnectionTests {
         connections.dest.getConnectionFactory().close();
     }
 
-    @Test(timeout=100)
+    @Test(timeout=500)
     public void testSocketsSendData() throws IOException {
         ConnectionPair<SocketInformation> connections = createConnectionPair(PORT1, PORT2);
 
