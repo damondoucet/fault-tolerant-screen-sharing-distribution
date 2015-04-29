@@ -21,13 +21,13 @@ public class ImageViewerTests {
         ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<Snapshot>();
         ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, 30);
         int testDuration = 5000;
+
         grabber.startCapture();
         Util.sleepMillis(testDuration);
         Slideshow test = new Slideshow(buffer);
         Util.sleepMillis(testDuration);
-        grabber.endCapture();
-//        assertTrue(buffer.size() > testDuration/100/2);
 
+        grabber.endCapture();
         test.close();
     }
 

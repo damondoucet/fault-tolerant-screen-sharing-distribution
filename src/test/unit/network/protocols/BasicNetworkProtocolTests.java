@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
  */
 public class BasicNetworkProtocolTests {
     // How long until a client should have received the snapshot.
-    private final static int CLIENT_DELAY_MILLIS = 500;
+    private final static int CLIENT_DELAY_MILLIS = 700;
 
     // How long until starting/stopping a thread should have kicked in.
     private final static int THREAD_DELAY_MILLIS = 100;
