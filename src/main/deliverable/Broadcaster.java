@@ -12,7 +12,6 @@ import main.util.Util;
 
 import java.awt.*;
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -69,7 +68,7 @@ public class Broadcaster {
                 SocketConnectionFactory.fromSocketInfo(socketInfo));
 
         ConcurrentLinkedQueue<Snapshot> snapshots = new ConcurrentLinkedQueue<>();
-        ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(snapshots, FREQUENCY);
+        ScreenGrabber grabber = ScreenGrabber.fromQueueFrequencyDimension(snapshots, FREQUENCY, new Dimension(600, 300));
         Broadcaster broadcaster = new Broadcaster(grabber, snapshots, netBroadcaster);
 
         broadcaster.start();

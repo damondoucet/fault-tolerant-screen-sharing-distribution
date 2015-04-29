@@ -27,7 +27,7 @@ public class ScreenGrabber {
                           long frequency, Dimension dimension) {
         this.myRobot = robot;
         this.dimension = dimension;
-        this.screenRectangle = new Rectangle(this.dimension);
+        this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         this.buffer = buffer;
         this.frequency = frequency;
         this.isCapturing = new AtomicBoolean();
@@ -46,7 +46,14 @@ public class ScreenGrabber {
     public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
                                                       long frequency)
             throws AWTException {
-        return new ScreenGrabber(new Robot(), buffer, frequency, Toolkit.getDefaultToolkit().getScreenSize());
+        return fromQueueFrequencyDimension(buffer, frequency, Toolkit.getDefaultToolkit().getScreenSize());
+    }
+
+    public static ScreenGrabber fromQueueFrequencyDimension(ConcurrentLinkedQueue<Snapshot> buffer,
+                                                            long frequency,
+                                                            Dimension dimension)
+            throws AWTException {
+        return new ScreenGrabber(new Robot(), buffer, frequency, dimension);
     }
 
     /**
