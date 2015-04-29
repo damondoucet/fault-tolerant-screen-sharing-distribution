@@ -1,4 +1,4 @@
-package test.network.protocols;
+package test.unit.network.protocols;
 
 import main.util.Util;
 import main.network.protocols.NetworkProtocol;
@@ -8,7 +8,7 @@ import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
 import org.junit.Before;
 import org.junit.Test;
-import test.ImageUtil;
+import test.unit.ImageUtil;
 import main.Snapshot;
 
 import java.util.ArrayList;

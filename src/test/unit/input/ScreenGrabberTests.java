@@ -1,4 +1,4 @@
-package test.input;
+package test.unit.input;
 
 import main.Snapshot;
 import main.input.ScreenGrabber;

@@ -1,4 +1,4 @@
-package test;
+package test.unit;
 
 import org.junit.Test;
 import static com.google.common.base.Preconditions.*;

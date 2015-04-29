@@ -1,4 +1,4 @@
-package test.imageviewer;
+package test.unit.imageviewer;
 
 import main.Snapshot;
 import main.imageviewer.Slideshow;
@@ -28,7 +28,7 @@ public class ImageViewerTests {
         grabber.endCapture();
 //        assertTrue(buffer.size() > testDuration/100/2);
 
-
+        test.close();
     }
 
 }
