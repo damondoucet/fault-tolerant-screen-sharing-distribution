@@ -1,7 +1,7 @@
 package main.network.test;
 
 import main.network.Connection;
-import main.network.Util;
+import main.util.Util;
 
 import static com.google.common.base.Preconditions.*;
 

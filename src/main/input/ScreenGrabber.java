@@ -61,7 +61,7 @@ public class ScreenGrabber {
      */
     public static ScreenGrabber fromQueueAndFrequency(ConcurrentLinkedQueue<Snapshot> buffer,
                                                       long frequency, Dimension dimension)
-            throws AWTException {;
+            throws AWTException {
         return new ScreenGrabber(new Robot(), buffer, frequency, dimension);
     }
 
@@ -97,7 +97,5 @@ public class ScreenGrabber {
                 e.printStackTrace();
             }
         }
-
     }
-
 }

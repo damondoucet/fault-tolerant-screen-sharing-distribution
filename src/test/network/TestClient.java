@@ -2,7 +2,7 @@ package test.network;
 
 import main.network.Connection;
 import main.network.ConnectionFactory;
-import main.network.Util;
+import main.util.Util;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;

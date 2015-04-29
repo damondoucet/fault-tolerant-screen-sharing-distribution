@@ -1,6 +1,6 @@
 package main.network.protocols.basic;
 
-import main.InterruptableThreadSet;
+import main.util.InterruptableThreadSet;
 import main.Snapshot;
 import main.network.ClientList;
 import main.network.ConnectionFactory;

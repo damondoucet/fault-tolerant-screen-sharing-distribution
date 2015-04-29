@@ -1,6 +1,6 @@
 package test.network.protocols;
 
-import main.network.Util;
+import main.util.Util;
 import main.network.protocols.NetworkProtocol;
 import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
 import main.network.protocols.basic.BasicNetworkProtocolClient;

@@ -12,4 +12,12 @@ public class SocketInformation {
         this.ip = ip;
         this.port = port;
     }
+
+    @Override
+    public String toString() {
+        return "SocketInformation{" +
+                "ip='" + ip + '\'' +
+                ", port=" + port +
+                '}';
+    }
 }

@@ -3,11 +3,10 @@ package test.imageviewer;
 import main.Snapshot;
 import main.imageviewer.Slideshow;
 import main.input.ScreenGrabber;
-import main.network.Util;
+import main.util.Util;
 import org.junit.Test;
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.assertTrue;

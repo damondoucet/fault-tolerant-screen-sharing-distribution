@@ -3,7 +3,7 @@ package test.input;
 import main.Snapshot;
 import main.input.ScreenGrabber;
 
-import main.network.Util;
+import main.util.Util;
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 

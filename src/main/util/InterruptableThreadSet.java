@@ -1,6 +1,4 @@
-package main;
-
-import main.network.Util;
+package main.util;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

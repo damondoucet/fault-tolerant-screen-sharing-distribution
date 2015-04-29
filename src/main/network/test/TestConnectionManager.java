@@ -1,7 +1,7 @@
 package main.network.test;
 
 import main.network.Connection;
-import main.network.Util;
+import main.util.Util;
 
 import java.util.Collections;
 import java.util.HashMap;

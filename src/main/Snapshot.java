@@ -2,6 +2,7 @@ package main;
 
 import com.google.common.primitives.Longs;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import main.util.Util;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -73,16 +74,13 @@ public class Snapshot {
     }
 
     private static long readLong(InputStream stream) throws IOException {
-        byte[] bytes = new byte[Long.BYTES];
-        stream.read(bytes);
-        return Longs.fromByteArray(bytes);
+        return Longs.fromByteArray(Util.read(stream, Long.BYTES));
     }
 
     private static BufferedImage readImage(InputStream stream, long imageSize)
-            throws IOException{
-        byte[] imageBytes = new byte[(int)imageSize];
-        stream.read(imageBytes);
-        return ImageIO.read(new ByteArrayInputStream(imageBytes));
+            throws IOException {
+        return ImageIO.read(new ByteArrayInputStream(
+                Util.read(stream, (int)imageSize)));
     }
 
     // See comment above toBytes

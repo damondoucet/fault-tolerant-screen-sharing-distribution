@@ -1,14 +1,13 @@
 package main.network.protocols.basic;
 
-import main.InterruptableThreadSet;
+import main.util.InterruptableThreadSet;
 import main.Snapshot;
 import main.network.Connection;
 import main.network.ConnectionFactory;
-import main.network.Util;
+import main.util.Util;
 import main.network.protocols.NetworkProtocol;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 
 /**
@@ -21,7 +20,7 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
 
     private Connection<T> connection;
 
-    public BasicNetworkProtocolClient(ConnectionFactory<T> connectionFactory,
+    private BasicNetworkProtocolClient(ConnectionFactory<T> connectionFactory,
                                       T broadcasterKey,
                                       boolean lossy) {
         super(connectionFactory);

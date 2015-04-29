@@ -1,9 +1,12 @@
 package main.network;
 
+import main.util.Util;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * A socket-based Connection.
@@ -63,7 +66,7 @@ public class SocketConnection implements Connection<SocketInformation> {
 
     @Override
     public int read(byte[] bytes, int numBytes) throws IOException {
-        return inputStream.read(bytes, 0, numBytes);
+        return Util.read(inputStream, bytes, numBytes);
     }
 
     @Override
