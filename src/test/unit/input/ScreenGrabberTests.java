@@ -5,7 +5,7 @@ import main.input.ScreenGrabber;
 
 import main.util.Util;
 import org.junit.Test;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.awt.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,17 +20,17 @@ public class ScreenGrabberTests {
     // what you are doing with your computer, so run it a couple of times.
     @Test
     public void TestFPS() throws AWTException {
-        ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<Snapshot>();
-        int[] fps = {1, 10, 20, 30};
+        ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<>();
+        int[] fpsValues = {1, 10, 20, 30};
         int testDurationSecs = 2;
-        for (int i=0; i < fps.length; i++) {
-            ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, fps[i]);
+        for (int fps : fpsValues) {
+            ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, fps);
             grabber.startCapture();
             Util.sleepMillis(testDurationSecs*1000);
             grabber.endCapture();
-            System.out.println("actual: " + buffer.size() + ", ideal: " + testDurationSecs * fps[i]);
-            assertTrue(buffer.size() > testDurationSecs * fps[i] / 1.5);
-            assertTrue(buffer.size() < testDurationSecs * fps[i] + 1);
+            System.out.println("actual: " + buffer.size() + ", ideal: " + testDurationSecs * fps);
+            assertTrue(buffer.size() > testDurationSecs * fps / 1.5);
+            assertTrue(buffer.size() < testDurationSecs * fps + 1);
             buffer.clear();
         }
     }
@@ -38,7 +38,7 @@ public class ScreenGrabberTests {
     // Tests that the screen grabber takes screenshots at the right resolution.
     @Test
     public void TestResolution() throws AWTException {
-        ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<Snapshot>();
+        ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<>();
         int fps = 20;
         Dimension dimension = new Dimension(300, 500);
         int testDurationSecs = 1;
@@ -48,11 +48,15 @@ public class ScreenGrabberTests {
         Util.sleepMillis(testDurationSecs*1000);
         grabber.endCapture();
 
+        int previousFrame = -1;
         while (!buffer.isEmpty()) {
             Snapshot thisSnapshot = buffer.poll();
+
+            assertEquals(previousFrame + 1, thisSnapshot.getFrameIndex());
+            previousFrame++;
+
             assertTrue(thisSnapshot.getImage().getWidth() == dimension.getWidth());
             assertTrue(thisSnapshot.getImage().getHeight() == dimension.getHeight());
         }
     }
-
 }

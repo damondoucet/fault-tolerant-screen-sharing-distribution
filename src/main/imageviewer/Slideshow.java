@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * Basic slide show app, adapted from Chris Bailey-Kellogg app from Dartmouth CS
  */
 public class Slideshow extends DrawingFrame {
-    private final ConcurrentLinkedQueue<Snapshot> slides;					// images to display
     private final QueueHandler<Snapshot> queueHandler;
 
     private static BufferedImage getStartingImage() {
@@ -19,7 +18,7 @@ public class Slideshow extends DrawingFrame {
 
     public Slideshow(ConcurrentLinkedQueue<Snapshot> images) {
         super("Slideshow", getStartingImage(), 600, 300);
-        slides = images;
+        ConcurrentLinkedQueue<Snapshot> slides = images;
 
         queueHandler = new QueueHandler<>(
                 slides,

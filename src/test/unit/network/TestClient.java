@@ -42,9 +42,7 @@ public class TestClient<T> {
         new Thread(() -> {
             try {
                 conn.set(connectionFactory.openConnection(dest));
-            } catch (RuntimeException e) {
-                err.set(e);
-            } catch (IOException e) {
+            } catch (RuntimeException|IOException e) {
                 err.set(e);
             }
         }).start();
@@ -62,9 +60,7 @@ public class TestClient<T> {
         new Thread(() -> {
             try {
                 conn.set(connectionFactory.acceptConnection());
-            } catch (RuntimeException e) {
-                err.set(e);
-            } catch (IOException e) {
+            } catch (RuntimeException|IOException e) {
                 err.set(e);
             }
         }).start();
@@ -90,7 +86,7 @@ public class TestClient<T> {
     }
 
     // Connects two TestClients
-    public static <T> ConnectionPair connect(TestClient<T> source,
+    public static <T> ConnectionPair<T> connect(TestClient<T> source,
                                              TestClient<T> dest) {
         AtomicReference<Connection<T>> sourceToDestRef = new AtomicReference<>(),
                 destToSourceRef = new AtomicReference<>();

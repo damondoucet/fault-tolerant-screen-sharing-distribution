@@ -22,11 +22,11 @@ public class BasicNetworkProtocolBroadcaster<T> extends BasicNetworkProtocol<T> 
 
     public BasicNetworkProtocolBroadcaster(ConnectionFactory<T> connectionFactory) {
         super(connectionFactory);
-        clientList = new ClientList<T>(connectionFactory.getKey());
+        clientList = new ClientList<>(connectionFactory.getKey());
         snapshotQueue = new ConcurrentLinkedQueue<>();
 
         threadSet = new InterruptableThreadSet(
-                Arrays.asList(() -> acceptConnections(), () -> sendSnapshot()),
+                Arrays.asList(this::acceptConnections, this::sendSnapshot),
                 null);  // TODO(ddoucet): should probably handle errors
     }
 

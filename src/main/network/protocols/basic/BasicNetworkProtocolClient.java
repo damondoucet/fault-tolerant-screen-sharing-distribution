@@ -27,7 +27,7 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
 
         this.broadcasterKey = broadcasterKey;
         this.threadSet = new InterruptableThreadSet(
-                Arrays.asList(() -> receiveSnapshots()),
+                Arrays.asList(this::receiveSnapshots),
                 null);
         this.lossy = lossy;
 

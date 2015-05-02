@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public abstract class BasicNetworkProtocol<T> implements NetworkProtocol {
     protected final ConnectionFactory<T> connectionFactory;
     protected ConcurrentLinkedQueue<Snapshot> queue;
-    protected AtomicReference<Snapshot> mostRecentSnapshot;
+    protected final AtomicReference<Snapshot> mostRecentSnapshot;
 
     protected BasicNetworkProtocol(ConnectionFactory<T> connectionFactory) {
         this.connectionFactory = connectionFactory;

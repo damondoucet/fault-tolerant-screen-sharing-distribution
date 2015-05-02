@@ -58,8 +58,6 @@ public class Client {
 
         Client client = new Client(networkClient);
         client.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            client.stop();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(client::stop));
     }
 }

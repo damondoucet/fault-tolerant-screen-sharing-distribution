@@ -1,6 +1,7 @@
 package main.input;
 
 import main.Snapshot;
+import main.util.Util;
 import org.imgscalr.Scalr;
 
 import java.awt.*;
@@ -13,14 +14,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * ConcurrentLinkedQueue<BufferedImage> at a specific resolution.
  */
 public class ScreenGrabber {
-    private Robot myRobot;
-    private Rectangle screenRectangle;
-    private ConcurrentLinkedQueue<Snapshot> buffer;
-    private long frequency; // in fps
-    private AtomicBoolean isCapturing;
+    private final Robot myRobot;
+    private final Rectangle screenRectangle;
+    private final ConcurrentLinkedQueue<Snapshot> buffer;
+    private final AtomicBoolean isCapturing;
     private Snapshot mySnapshot;
-    private long delay; // in millis
-    private Dimension dimension;
+    private final long delay; // in millis
+    private final Dimension dimension;
 
     private ScreenGrabber(Robot robot,
                           ConcurrentLinkedQueue<Snapshot> buffer,
@@ -29,7 +29,6 @@ public class ScreenGrabber {
         this.dimension = dimension;
         this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         this.buffer = buffer;
-        this.frequency = frequency;
         this.isCapturing = new AtomicBoolean();
         this.delay = 1000 / frequency;
     }
@@ -75,11 +74,19 @@ public class ScreenGrabber {
 
     public void startCapture() {
         this.isCapturing.set(true);
-        new Thread(() -> capture()).start(); // lambda function that is coerced to be a Runnable
+        new Thread(this::capture).start(); // lambda function that is coerced to be a Runnable
     }
 
     public void endCapture() {
         this.isCapturing.set(false);
+    }
+
+    private BufferedImage resize(BufferedImage img) {
+        return Scalr.resize(img,
+                Scalr.Method.SPEED,
+                Scalr.Mode.FIT_EXACT,
+                (int) this.dimension.getWidth(),
+                (int) this.dimension.getHeight());
     }
 
     public void capture() {
@@ -87,22 +94,18 @@ public class ScreenGrabber {
             long startTimeMillis = System.currentTimeMillis();
             BufferedImage img = this.myRobot.createScreenCapture(this.screenRectangle);
             if(img != null) {
-                img = Scalr.resize(img, (int) this.dimension.getWidth(), (int) this.dimension.getHeight());
-                if (this.mySnapshot == null) {
+                img = resize(img);
+                if (this.mySnapshot == null)
                     this.mySnapshot = Snapshot.lossySnapshot(0, img);
-                    this.buffer.add(this.mySnapshot);
-                } else {
-                    this.buffer.add(this.mySnapshot.createNext(img));
-                }
+                else
+                    this.mySnapshot = this.mySnapshot.createNext(img);
+
+                this.buffer.add(this.mySnapshot);
             }
 
             long timeElapsed = System.currentTimeMillis() - startTimeMillis;
-            long sleepTime = (this.delay - timeElapsed > 0) ? this.delay - timeElapsed : 0;
-            try {
-                Thread.sleep(sleepTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            long sleepTime = Math.max(this.delay - timeElapsed, 0);
+            Util.sleepMillis(sleepTime);
         }
     }
 }

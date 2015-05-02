@@ -17,7 +17,7 @@ public class QueueHandler<T> {
         this.queue = queue;
         this.consumer = consumer;
         this.threadSet = new InterruptableThreadSet(
-                Arrays.asList(() -> maybeHandleEntry()),
+                Arrays.asList(this::maybeHandleEntry),
                 null);
     }
 

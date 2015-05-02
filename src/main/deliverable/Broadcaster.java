@@ -22,7 +22,6 @@ public class Broadcaster {
     private final static int PORT = 5567;
     private final static long FREQUENCY = 20;
 
-    private final ConcurrentLinkedQueue<Snapshot> grabberOutput;
     private final ScreenGrabber grabber;
     private final NetworkProtocol networkBroadcaster;
 
@@ -34,7 +33,6 @@ public class Broadcaster {
     private Broadcaster(ScreenGrabber grabber,
                        ConcurrentLinkedQueue<Snapshot> grabberOutput,
                        NetworkProtocol networkBroadcaster) {
-        this.grabberOutput = grabberOutput;
         this.grabber = grabber;
         this.networkBroadcaster = networkBroadcaster;
         this.slideshowInput = new ConcurrentLinkedQueue<>();
@@ -72,8 +70,6 @@ public class Broadcaster {
         Broadcaster broadcaster = new Broadcaster(grabber, snapshots, netBroadcaster);
 
         broadcaster.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            broadcaster.stop();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(broadcaster::stop));
     }
 }

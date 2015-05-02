@@ -106,8 +106,10 @@ public class Snapshot {
     public static boolean imagesEqual(BufferedImage lhs, BufferedImage rhs) {
         if ((lhs == null) ^ (rhs == null))
             return false;
+        if (lhs == null && rhs == null)
+            return true;
 
-        int width = lhs.getWidth(), height = rhs.getHeight();
+        int width = lhs.getWidth(), height = lhs.getHeight();
 
         if (width != rhs.getWidth() ||
                 height != rhs.getHeight())

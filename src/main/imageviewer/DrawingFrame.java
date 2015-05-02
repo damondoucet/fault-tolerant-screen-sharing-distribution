@@ -101,7 +101,7 @@ public class DrawingFrame extends JFrame {
         canvas.setPreferredSize(new Dimension(width, height));
         getContentPane().add(canvas);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         pack();
         setVisible(true);
     }
