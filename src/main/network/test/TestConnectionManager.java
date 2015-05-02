@@ -6,6 +6,7 @@ import main.util.Util;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.base.Preconditions.*;
@@ -32,7 +33,7 @@ public class TestConnectionManager {
     private final Map<String, ConcurrentLinkedQueue<String>> awaitingConnections;
 
     // Maps source to a map which maps destination to a connection. Used for
-    // closing connections.
+    // closing and rate-limiting connections.
     private final Map<String, Map<String, TestConnection>> connections;
 
     public TestConnectionManager() {
@@ -42,8 +43,20 @@ public class TestConnectionManager {
     }
 
     public void onNewClient(String key) {
+        checkState(!connectionData.containsKey(key),
+                "Already have client " + key);
         connectionData.put(key, Collections.synchronizedMap(new HashMap<>()));
         awaitingConnections.put(key, new ConcurrentLinkedQueue<>());
+        connections.put(key, new ConcurrentHashMap<>());
+    }
+
+    private TestConnection createConnection(ConcurrentLinkedQueue<Byte> readQueue,
+                                            ConcurrentLinkedQueue<Byte> writeQueue,
+                                            String source, String dest) {
+        TestConnection connection = new TestConnection(
+                this, readQueue, writeQueue, source, dest);
+        connections.get(source).put(dest, connection);
+        return connection;
     }
 
     // Creates and inserts a queue both from source to dest and from dest to
@@ -60,8 +73,7 @@ public class TestConnectionManager {
         connectionData.get(source).put(dest, sourceToDest);
         connectionData.get(dest).put(source, destToSource);
 
-        return new TestConnection(
-                this,
+        return createConnection(
                 destToSource /* read queue */,
                 sourceToDest /* write queue */,
                 source, dest);
@@ -72,7 +84,7 @@ public class TestConnectionManager {
 
         // We want to return a connection so that the connecting client is our
         // destination and we are the source.
-        return createConnection(forKey, source);
+         return createConnection(forKey, source);
     }
 
     private TestConnection waitForConnection(String source, String dest) {
@@ -86,8 +98,7 @@ public class TestConnectionManager {
         ConcurrentLinkedQueue<Byte> sourceToDest = connections.get(dest),
                 destToSource = connectionData.get(dest).get(source);
 
-        return new TestConnection(
-                this,
+        return createConnection(
                 destToSource /* read queue */,
                 sourceToDest /* write queue */,
                 source, dest);
@@ -102,19 +113,36 @@ public class TestConnectionManager {
     }
 
     public void closeConnection(String source, String dest) {
-        TestConnection sourceToDest = connections.get(source).get(dest),
-            destToSource = connections.get(dest).get(source);
+        TestConnection sourceToDest = connections.get(source).get(dest);
+        TestConnection destToSource = connections.get(dest).get(source);
 
-        checkState(sourceToDest != null,
-                "Closing a connection that's already closed (from %s to %s).",
-                source, dest);
+        if (sourceToDest == null) {
+            // Closing a connection that's already closed.
+            return;
+        }
 
         // Note we remove from the map first in order to avoid infinite
         // recursion.
         connections.get(source).remove(dest);
+        connectionData.get(source).remove(dest);
         if (destToSource != null) {
             connections.get(dest).remove(source);
+            connectionData.get(dest).remove(source);
+
+            // Notify the connection object that it's closed.
             destToSource.close();
         }
+    }
+
+    /**
+     * Sets a bi-directional limit on the rate at which data can be
+     * transferred.
+     *
+     * @param a
+     * @param b
+     * @param kbps
+     */
+    public void setRateLimit(String a, String b, int kbps) {
+
     }
 }

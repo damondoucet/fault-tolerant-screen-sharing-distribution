@@ -68,10 +68,13 @@ public class TestClient<T> {
 
     private static void checkExceptions(AtomicReference<Exception> atSource,
                                         AtomicReference<Exception> atDest) {
-        if (atSource.get() != null)
-            throw new RuntimeException("Exception when connecting from source", atSource.get());
-        if (atDest.get() != null)
-            throw new RuntimeException("Exception when accepting at dest", atDest.get());
+        Exception e;  // this appeases the static analysis tool even though an
+        // exception will never be unset.
+
+        if ((e = atSource.get()) != null)
+            throw new RuntimeException("Exception when connecting from source", e);
+        if ((e = atDest.get()) != null)
+            throw new RuntimeException("Exception when accepting at dest", e);
     }
 
     private static <T> void wait(AtomicReference<Connection<T>> source,
@@ -87,7 +90,7 @@ public class TestClient<T> {
 
     // Connects two TestClients
     public static <T> ConnectionPair<T> connect(TestClient<T> source,
-                                             TestClient<T> dest) {
+                                                TestClient<T> dest) {
         AtomicReference<Connection<T>> sourceToDestRef = new AtomicReference<>(),
                 destToSourceRef = new AtomicReference<>();
         AtomicReference<Exception> err1 = new AtomicReference<>(),

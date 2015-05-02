@@ -19,7 +19,7 @@ public class ScreenGrabber {
     private final ConcurrentLinkedQueue<Snapshot> buffer;
     private final AtomicBoolean isCapturing;
     private Snapshot mySnapshot;
-    private final long delay; // in millis
+    private final long delayMillis; // in millis
     private final Dimension dimension;
 
     private ScreenGrabber(Robot robot,
@@ -30,7 +30,7 @@ public class ScreenGrabber {
         this.screenRectangle = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
         this.buffer = buffer;
         this.isCapturing = new AtomicBoolean();
-        this.delay = 1000 / frequency;
+        this.delayMillis = 1000 / frequency;
     }
 
     /**
@@ -91,7 +91,7 @@ public class ScreenGrabber {
 
     public void capture() {
         while (this.myRobot != null && this.isCapturing.get()) {
-            long startTimeMillis = System.currentTimeMillis();
+            long startNano = System.nanoTime();
             BufferedImage img = this.myRobot.createScreenCapture(this.screenRectangle);
             if(img != null) {
                 img = resize(img);
@@ -103,8 +103,9 @@ public class ScreenGrabber {
                 this.buffer.add(this.mySnapshot);
             }
 
-            long timeElapsed = System.currentTimeMillis() - startTimeMillis;
-            long sleepTime = Math.max(this.delay - timeElapsed, 0);
+            long endNano = System.nanoTime();
+            long millisElapsed = (long)((endNano - startNano) / 1e6);
+            long sleepTime = Math.max(this.delayMillis - millisElapsed, 0);
             Util.sleepMillis(sleepTime);
         }
     }
