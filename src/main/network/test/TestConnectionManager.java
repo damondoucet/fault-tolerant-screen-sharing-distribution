@@ -36,10 +36,16 @@ public class TestConnectionManager {
     // closing and rate-limiting connections.
     private final Map<String, Map<String, TestConnection>> connections;
 
+    // Note that rate limits are bidirectional. This maps the lexicographically
+    // lower key to a map of lexicographically higher key to rate limit.
+    // Units of rate limits are kbps.
+    private final Map<String, Map<String, Double>> rateLimits;
+
     public TestConnectionManager() {
         connectionData = Collections.synchronizedMap(new HashMap<>());
         awaitingConnections = Collections.synchronizedMap(new HashMap<>());
         connections = Collections.synchronizedMap(new HashMap<>());
+        rateLimits = Collections.synchronizedMap(new HashMap<>());
     }
 
     public void onNewClient(String key) {
@@ -48,6 +54,39 @@ public class TestConnectionManager {
         connectionData.put(key, Collections.synchronizedMap(new HashMap<>()));
         awaitingConnections.put(key, new ConcurrentLinkedQueue<>());
         connections.put(key, new ConcurrentHashMap<>());
+        rateLimits.put(key, new ConcurrentHashMap<>());
+    }
+
+    private double getRateLimit(String a, String b) {
+        if (a.compareTo(b) > 0)
+            return getRateLimit(b, a);
+
+        Map<String, Double> map = rateLimits.get(a);
+        if (map.containsKey(b))
+            return map.get(b);
+        else
+            return -1;
+    }
+
+    /**
+     * Sets a bi-directional limit on the rate at which data can be
+     * transferred.
+     */
+    public void setRateLimit(String a, String b, double kbps) {
+        if (a.compareTo(b) > 0) {
+            setRateLimit(b, a, kbps);
+            return;
+        }
+
+        rateLimits.get(a).put(b, kbps);
+
+        // TODO(ddoucet): is there a race condition with creating at the same
+        // time this is happening?
+        TestConnection conn = connections.get(a).get(b);
+        if (conn != null) {
+            conn.setRateLimit(kbps);
+            connections.get(b).get(a).setRateLimit(kbps);
+        }
     }
 
     private TestConnection createConnection(ConcurrentLinkedQueue<Byte> readQueue,
@@ -55,6 +94,7 @@ public class TestConnectionManager {
                                             String source, String dest) {
         TestConnection connection = new TestConnection(
                 this, readQueue, writeQueue, source, dest);
+        connection.setRateLimit(getRateLimit(source, dest));
         connections.get(source).put(dest, connection);
         return connection;
     }
@@ -132,17 +172,5 @@ public class TestConnectionManager {
             // Notify the connection object that it's closed.
             destToSource.close();
         }
-    }
-
-    /**
-     * Sets a bi-directional limit on the rate at which data can be
-     * transferred.
-     *
-     * @param a
-     * @param b
-     * @param kbps
-     */
-    public void setRateLimit(String a, String b, int kbps) {
-
     }
 }

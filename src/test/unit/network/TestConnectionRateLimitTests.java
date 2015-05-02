@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 public class TestConnectionRateLimitTests {
     private final static String SOURCE_KEY = "source";
     private final static String DEST_KEY = "dest";
-    private final static int KBPS = 10;
+    private final static double KBPS = 10;
 
     private byte[] createData(int numBytes) {
         byte[] data = new byte[numBytes];
@@ -45,28 +45,22 @@ public class TestConnectionRateLimitTests {
      * Note that it assumes the connection has ALREADY been rate-limited.
      */
     private void testConnectionIsRateLimited(ConnectionPair connections,
-                                             int kbps) throws IOException {
+                                             double kbps) throws IOException {
         // (kbps kb/s * 1000 b/kb * 0.1s) + 1 byte
-        byte[] data = createData(kbps * 100 + 1);
+        byte[] data = createData((int)(kbps * 100 + 1));
         connections.sourceToDest.write(data);
 
         long start = System.nanoTime();
         byte[] received = Util.read(
                 connections.destToSource.getInputStream(), data.length);
         long end = System.nanoTime();
-        double durationSeconds = (long)((end - start) / 1e9);
+        double durationSeconds = (end - start) / 1e9;
 
         assertEquals(Bytes.asList(data), Bytes.asList(received));
 
-        // The fastest this should run is 0.1s, and the slowest is 0.2s. We
-        // give slightly more acceptable bounds by accepting 0.05s through
-        // 0.25s.
-        /* System.out.println(
-                "Should have taken between 0.1s and 0.2s " +
-                    "(fudge factor allows 0.05s to 0.25s), took " +
-                    durationSeconds + "s"); */
+        // This should run around 0.1s. We accept 0.05s through 0.15s.
         assertTrue("Took " + durationSeconds + "s",
-                durationSeconds >= 0.05 && durationSeconds <= 0.25);
+                durationSeconds >= 0.05 && durationSeconds <= 0.15);
     }
 
     // Tests that a connection can be rate-limited.

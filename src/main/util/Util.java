@@ -8,6 +8,8 @@ import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * Static utility functions.
  */
@@ -58,6 +60,10 @@ public class Util {
     }
 
     public static int read(InputStream inputStream, byte[] bytes, int numBytes) throws IOException {
+        checkArgument(bytes.length >= numBytes,
+                "Read buffer not big enough. Length given: %s, numBytes: %s",
+                bytes.length, numBytes);
+
         int bytesRead = 0;
         while (bytesRead < numBytes) {
             int n = inputStream.read(bytes, bytesRead, numBytes - bytesRead);

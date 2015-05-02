@@ -1,6 +1,7 @@
 package main.network.test;
 
 import main.network.Connection;
+import main.util.RateLimitingInputStream;
 import main.util.Util;
 
 import static com.google.common.base.Preconditions.*;
@@ -32,6 +33,7 @@ public class TestConnection implements Connection<String> {
 
     private final ConcurrentLinkedQueue<Byte> readQueue;
     private final ConcurrentLinkedQueue<Byte> writeQueue;
+    private final RateLimitingInputStream inputStream;
     private final String source;
     private final String dest;
 
@@ -45,6 +47,8 @@ public class TestConnection implements Connection<String> {
         this.manager = manager;
         this.readQueue = readQueue;
         this.writeQueue = writeQueue;
+        this.inputStream = new RateLimitingInputStream(new TestConnectionInputStream());
+
         this.source = source;
         this.dest = dest;
         closed = new AtomicBoolean(false);
@@ -60,22 +64,17 @@ public class TestConnection implements Connection<String> {
 
     @Override
     public InputStream getInputStream() {
-        return new TestConnectionInputStream();
+        return inputStream;
     }
 
     @Override
     public int read(byte[] bytes, int numBytes) throws IOException {
-        checkArgument(bytes.length >= numBytes,
-                "Read buffer not big enough. Length given: %s, numBytes: %s",
-                bytes.length, numBytes);
-
-        for (int i = 0; i < numBytes; i++)
-            bytes[i] = Util.next(readQueue);
+        int bytesRead = Util.read(inputStream, bytes, numBytes);
 
         if (closed.get())
             throw new IOException("Stream closed");
 
-        return numBytes;
+        return bytesRead;
     }
 
     @Override
@@ -91,5 +90,10 @@ public class TestConnection implements Connection<String> {
      public void close() {
         closed.set(true);
         manager.closeConnection(source, dest);
+    }
+
+    // TODO(ddoucet): @Override
+    public void setRateLimit(double kbps) {
+        inputStream.setRateLimit(kbps);
     }
 }
