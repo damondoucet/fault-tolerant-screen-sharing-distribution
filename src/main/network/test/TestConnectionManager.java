@@ -146,6 +146,7 @@ public class TestConnectionManager {
 
     public Connection<String> openConnection(String source, String dest) {
         // Insert ourselves into the destination's awaitingConnections list.
+        com.google.common.base.Verify.verify(awaitingConnections.get(dest) != null);
         awaitingConnections.get(dest).add(source);
 
         // Wait until we have a queue in connectionData and return that.

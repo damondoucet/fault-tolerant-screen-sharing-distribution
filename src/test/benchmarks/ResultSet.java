@@ -13,13 +13,11 @@ import java.util.stream.LongStream;
  *      Latency here is defined as the number of milliseconds between the
  *      end of inserting the snapshot into the broadcaster, and the end of
  *      receiving the snapshot at that client.
- *
- * TODO(ddoucet): should I just strongly connect this with the test client?
  */
-public class Result<T> {
+public class ResultSet<T> {
     private final Map<Integer, Map<T, Long>> roundToClientToLatency;
 
-    public Result(Map<Integer, Map<T, Long>> roundToClientToLatency) {
+    public ResultSet(Map<Integer, Map<T, Long>> roundToClientToLatency) {
         this.roundToClientToLatency = roundToClientToLatency;
     }
 
@@ -56,5 +54,13 @@ public class Result<T> {
 
     public long getMaxLatency() {
         return getLongStream().max().getAsLong();
+    }
+
+    public void print() {
+        System.out.println("=============");
+        System.out.println(" Result Set: ");
+        System.out.println("  avg lat: " + getAverageLatency() + "ms");
+        System.out.println("  max lat: " + getMaxLatency());
+        System.out.println("=============");
     }
 }

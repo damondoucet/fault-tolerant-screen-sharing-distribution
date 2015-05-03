@@ -5,6 +5,7 @@ import main.util.Util;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.*;
 
@@ -15,9 +16,18 @@ public class ClientList<T> {
     private final T key;
     private final List<Connection<T>> connections;
 
+    // If connectionHandler != null, we'll spawn a new thread and run the
+    // connectionHandler on it.
+    private final Consumer<Connection> connectionHandler;
+
     public ClientList(T key) {
+        this(key, null);
+    }
+
+    public ClientList(T key, Consumer<Connection> connectionHandler) {
         this.key = key;
-        connections = Collections.synchronizedList(new LinkedList<>());
+        this.connections = Collections.synchronizedList(new LinkedList<>());
+        this.connectionHandler = connectionHandler;
     }
 
     public void addConnection(Connection<T> connection) {
@@ -26,6 +36,22 @@ public class ClientList<T> {
                 connection.getSource(), key);
 
         connections.add(connection);
+
+        if (connectionHandler != null)
+            new Thread(new ConnectionHandler<>(connection)).start();
+    }
+
+    private class ConnectionHandler<T> implements Runnable {
+        private final Connection<T> connection;
+
+        public ConnectionHandler(Connection<T> connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public void run() {
+            connectionHandler.accept(connection);
+        }
     }
 
     public void removeConnection(T dest) {

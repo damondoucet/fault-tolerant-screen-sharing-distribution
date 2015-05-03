@@ -25,6 +25,5 @@ public interface ConnectionFactory<T> {
 
     public void close();
 
-    // TODO(ddoucet): Add some methods here for rate-limiting. Latency and/or
-    // throughput.
+    // TODO(ddoucet): Add some methods here for rate-limiting
 }

@@ -17,6 +17,7 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
     private final T broadcasterKey;
     private final InterruptableThreadSet threadSet;
     private final boolean lossy;
+    private boolean hasReceivedSnapshot;
 
     private Connection<T> connection;
 
@@ -30,6 +31,7 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
                 Arrays.asList(this::receiveSnapshots),
                 null);
         this.lossy = lossy;
+        hasReceivedSnapshot = false;
 
         this.connection = null;
     }
@@ -64,10 +66,14 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
         try {
             if (connection == null) {
                 connection = connectionFactory.openConnection(broadcasterKey);
+
+                if (connection != null && !hasReceivedSnapshot)
+                    connection.write(new byte[] { REQUEST_SNAPSHOT });
                 return;  // give the thread a chance to die
             }
 
             onSnapshot(Snapshot.fromInputStream(connection.getInputStream(), lossy));
+            hasReceivedSnapshot = true;
         } catch (IOException e) {
             if (connection != null)
                 connection.close();

@@ -11,6 +11,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * A simple protocol in which all clients connect to the broadcaster.
  */
 public abstract class BasicNetworkProtocol<T> implements NetworkProtocol {
+    // A client sends this byte to the broadcaster to request the most recent
+    // snapshot.
+    protected final static byte REQUEST_SNAPSHOT = 0x11;
+
     protected final ConnectionFactory<T> connectionFactory;
     protected ConcurrentLinkedQueue<Snapshot> queue;
     protected final AtomicReference<Snapshot> mostRecentSnapshot;

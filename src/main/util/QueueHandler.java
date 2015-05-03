@@ -8,7 +8,7 @@ import java.util.function.Consumer;
  * Handles a thread that can start and stop.
  */
 public class QueueHandler<T> {
-    private final ConcurrentLinkedQueue<T> queue;
+    public final ConcurrentLinkedQueue<T> queue;
     private final Consumer<T> consumer;
     private final InterruptableThreadSet threadSet;
 
@@ -19,6 +19,10 @@ public class QueueHandler<T> {
         this.threadSet = new InterruptableThreadSet(
                 Arrays.asList(this::maybeHandleEntry),
                 null);
+    }
+
+    public QueueHandler(Consumer<T> consumer) {
+        this(new ConcurrentLinkedQueue<T>(), consumer);
     }
 
     private void maybeHandleEntry() {

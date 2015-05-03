@@ -1,9 +1,10 @@
 package test.benchmarks;
 
-import main.network.ConnectionFactory;
 import main.network.test.TestConnectionManager;
 
+import java.util.ArrayList;
 import java.util.List;
+import static com.google.common.base.Verify.*;
 
 /**
  * Represents how connection speeds should be modified for an input case.
@@ -29,6 +30,37 @@ public class RateLimitSchedule {
         }
     }
 
+    public static class Builder {
+        private final List<List<RateLimitInstance>> schedule;
+
+        public Builder() {
+            schedule = new ArrayList<>();
+        }
+
+        public Builder setNumRounds(int numRounds) {
+            for (int i = 0; i < numRounds; i++)
+                schedule.add(new ArrayList<>());
+            return this;
+        }
+
+        // Sets the failures that will occur right before the given round.
+        public Builder setRound(int round, RateLimitInstance... instances) {
+            verify(schedule.size() != 0, "setNumRounds not called yet.");
+            verify(round >= 0 && round < schedule.size(), "Illegal round " + round);
+            verify(schedule.get(round).isEmpty(),
+                    "Already added round " + round);
+
+            for (RateLimitInstance instance : instances)
+                schedule.get(round).add(instance);
+
+            return this;
+        }
+
+        public List<List<RateLimitInstance>> build() {
+            return schedule;
+        }
+    }
+
     public final static int DEFAULT_KBPS = 100;
     private final TestConnectionManager manager;
     private final List<List<RateLimitInstance>> schedule;
@@ -39,6 +71,10 @@ public class RateLimitSchedule {
         this.schedule = schedule;
     }
 
+    public int getNumRounds() {
+        return schedule.size();
+    }
+
     /**
      * Initialize the rate limit between any pair of the given clients to the
      * default rate.
@@ -46,7 +82,9 @@ public class RateLimitSchedule {
      * @param clients The list of clients to initialize.
      */
     public void initialize(List<String> clients) {
-
+        for (int i = 0; i < clients.size(); i++)
+            for (int j = i + 1; j < clients.size(); j++)
+                manager.setRateLimit(clients.get(i), clients.get(j), DEFAULT_KBPS);
     }
 
     /**
@@ -56,6 +94,10 @@ public class RateLimitSchedule {
      * @param round The round for which limits should be applied.
      */
     public void applyForRound(int round) {
-
+        for (RateLimitInstance rateLimitInstance : schedule.get(round))
+            manager.setRateLimit(
+                    rateLimitInstance.a,
+                    rateLimitInstance.b,
+                    rateLimitInstance.kbps);
     }
 }

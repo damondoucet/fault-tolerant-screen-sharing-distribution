@@ -24,7 +24,7 @@ public class TestConnection implements Connection<String> {
     private class TestConnectionInputStream extends InputStream {
         @Override
         public int read() throws IOException {
-            return Util.next(readQueue);
+            return Util.next(readQueue) & 0xff;
         }
     }
 

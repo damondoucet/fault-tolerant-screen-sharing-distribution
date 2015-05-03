@@ -6,9 +6,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An InputStream that implements rate-limiting.
- *
- * TODO(ddoucet): threadsafety. I think the only thing needing to be threadsafe is
- * the rate limit, which I can just wrap as atomicint, right?
  */
 public class RateLimitingInputStream extends InputStream {
     // length of an epoch in nanoseconds; 0.1s = 1E8ns
