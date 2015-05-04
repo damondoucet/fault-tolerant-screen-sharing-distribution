@@ -39,6 +39,7 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
     public static <T> NetworkProtocol losslessClient(ConnectionFactory<T> connectionFactory,
                                                      T broadcasterKey) {
         return new BasicNetworkProtocolClient<>(connectionFactory, broadcasterKey, false);
+
     }
 
     public static <T> NetworkProtocol lossyClient(ConnectionFactory<T> connectionFactory,
