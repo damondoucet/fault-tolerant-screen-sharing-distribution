@@ -16,12 +16,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  * send snapshots to clients. When a connection is accepted, it's inserted into
  * a list, which the other thread iterates through when it receives a snapshot.
  */
-public class BasicNetworkProtocolBroadcaster<T> extends NetworkProtocolClient<T> {
+public class BasicNetworkProtocolBroadcaster<TKey> extends NetworkProtocolClient<TKey> {
     private final ConcurrentLinkedQueue<Snapshot> snapshotQueue;
     private final InterruptableThreadSet threadSet;
-    private final ClientList<T> clientList;
+    private final ClientList<TKey> clientList;
 
-    public BasicNetworkProtocolBroadcaster(ConnectionFactory<T> connectionFactory) {
+    public BasicNetworkProtocolBroadcaster(ConnectionFactory<TKey> connectionFactory) {
         super(connectionFactory);
         clientList = new ClientList<>(connectionFactory.getKey(), null);
         snapshotQueue = new ConcurrentLinkedQueue<>();
@@ -57,7 +57,7 @@ public class BasicNetworkProtocolBroadcaster<T> extends NetworkProtocolClient<T>
     private void sendSnapshot() {
         Snapshot snapshot = snapshotQueue.poll();
         if (snapshot != null) {
-            mostRecentSnapshot.set(snapshot);
+            onSnapshot(snapshot);
             clientList.sendSnapshot(snapshot);
         }
     }

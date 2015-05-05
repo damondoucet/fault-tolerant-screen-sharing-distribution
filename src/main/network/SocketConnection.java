@@ -1,6 +1,6 @@
 package main.network;
 
-import main.util.Util;
+import main.util.Serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,7 +65,7 @@ public class SocketConnection implements Connection<SocketInformation> {
 
     @Override
     public int read(byte[] bytes, int numBytes) throws IOException {
-        return Util.read(inputStream, bytes, numBytes);
+        return Serialization.read(inputStream, bytes, numBytes);
     }
 
     @Override

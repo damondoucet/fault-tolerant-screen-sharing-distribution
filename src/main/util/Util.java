@@ -1,12 +1,14 @@
 package main.util;
 
+import main.network.Connection;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -59,27 +61,18 @@ public class Util {
         return localMachineOnly ? "127.0.0.1" : Util.getMITIP();
     }
 
-    public static int read(InputStream inputStream, byte[] bytes, int numBytes) throws IOException {
-        checkArgument(bytes.length >= numBytes,
-                "Read buffer not big enough. Length given: %s, numBytes: %s",
-                bytes.length, numBytes);
-
-        int bytesRead = 0;
-        while (bytesRead < numBytes) {
-            int n = inputStream.read(bytes, bytesRead, numBytes - bytesRead);
-            if (n < 0)
-                break;
-            bytesRead += n;
-        }
-        return bytesRead;
+    public static <T> T doWithTimeout(Callable<T> callable, long timeoutMillis)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        // http://stackoverflow.com/questions/804951/is-it-possible-to-read-from-a-inputstream-with-a-timeout
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        Future<T> future = executor.submit(callable);
+        return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
     }
 
-    public static byte[] read(InputStream inputStream, int numBytes) throws IOException {
-        byte[] bytes = new byte[numBytes];
-        int bytesRead;
-        if ((bytesRead = read(inputStream, bytes, numBytes)) < numBytes)
-            throw new IOException("Unable to read all bytes from input stream. Read "
-                    + bytesRead + "; wanted " + numBytes);
-        return bytes;
+    public static <T> void threadsafeWrite(Connection<T> connection, byte[] bytes)
+            throws IOException {
+        synchronized (connection) {
+            connection.write(bytes);
+        }
     }
 }

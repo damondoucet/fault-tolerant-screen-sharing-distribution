@@ -5,6 +5,7 @@ import main.util.InterruptableThreadSet;
 import main.Snapshot;
 import main.network.Connection;
 import main.network.ConnectionFactory;
+import main.util.Serialization;
 import main.util.Util;
 import main.network.protocols.NetworkProtocol;
 
@@ -14,14 +15,14 @@ import java.util.Arrays;
 /**
  * Client for the basic network protocol.
  */
-public class BasicNetworkProtocolClient<T> extends NetworkProtocolClient<T> {
-    private final T broadcasterKey;
+public class BasicNetworkProtocolClient<TKey> extends NetworkProtocolClient<TKey> {
+    private final TKey broadcasterKey;
     private final InterruptableThreadSet threadSet;
 
-    private Connection<T> connection;
+    private Connection<TKey> connection;
 
-    private BasicNetworkProtocolClient(ConnectionFactory<T> connectionFactory,
-                                       T broadcasterKey,
+    private BasicNetworkProtocolClient(ConnectionFactory<TKey> connectionFactory,
+                                       TKey broadcasterKey,
                                        boolean lossy) {
         super(connectionFactory, lossy);
 
@@ -67,8 +68,15 @@ public class BasicNetworkProtocolClient<T> extends NetworkProtocolClient<T> {
                 return;  // give the thread a chance to die
             }
 
-            onSnapshot(readSnapshot(connection));
-        } catch (IOException e) {
+            byte prefix = Serialization.readByteWithTimeout(
+                    connection.getInputStream(), 5000);
+
+            if (prefix == Snapshot.SNAPSHOT_PREFIX)
+                onSnapshot(readSnapshot(connection, -1));
+            else
+                System.err.printf("%s read illegal prefix %s from broadcaster\n",
+                        connectionFactory.getKey(), prefix);
+        } catch (Exception e) {
             if (connection != null)
                 connection.close();
 

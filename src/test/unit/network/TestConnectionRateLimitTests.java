@@ -3,6 +3,7 @@ package test.unit.network;
 import com.google.common.primitives.Bytes;
 import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
+import main.util.Serialization;
 import main.util.Util;
 import org.junit.Test;
 
@@ -51,7 +52,7 @@ public class TestConnectionRateLimitTests {
         connections.sourceToDest.write(data);
 
         long start = System.nanoTime();
-        byte[] received = Util.read(
+        byte[] received = Serialization.read(
                 connections.destToSource.getInputStream(), data.length);
         long end = System.nanoTime();
         double durationSeconds = (end - start) / 1e9;

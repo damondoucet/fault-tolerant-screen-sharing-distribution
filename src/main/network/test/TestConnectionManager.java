@@ -80,12 +80,17 @@ public class TestConnectionManager {
 
         rateLimits.get(a).put(b, kbps);
 
-        // TODO(ddoucet): is there a race condition with creating at the same
+        // TODO(ddoucet): I think there's a race condition with creating at the same
         // time this is happening?
         TestConnection conn = connections.get(a).get(b);
         if (conn != null) {
             conn.setRateLimit(kbps);
+
+            // TODO(ddoucet): got a NPE here...
             connections.get(b).get(a).setRateLimit(kbps);
+
+            if (Math.abs(kbps) < 1e-6)
+                conn.close();
         }
     }
 
@@ -124,7 +129,10 @@ public class TestConnectionManager {
 
         // We want to return a connection so that the connecting client is our
         // destination and we are the source.
-         return createConnection(forKey, source);
+         Connection<String> connection = createConnection(forKey, source);
+        if (Math.abs(getRateLimit(forKey, source)) < 1e-6)
+            connection.close();
+        return connection;
     }
 
     private TestConnection waitForConnection(String source, String dest) {
@@ -146,11 +154,13 @@ public class TestConnectionManager {
 
     public Connection<String> openConnection(String source, String dest) {
         // Insert ourselves into the destination's awaitingConnections list.
-        com.google.common.base.Verify.verify(awaitingConnections.get(dest) != null);
         awaitingConnections.get(dest).add(source);
 
         // Wait until we have a queue in connectionData and return that.
-        return waitForConnection(source, dest);
+        Connection<String> connection = waitForConnection(source, dest);
+        if (Math.abs(getRateLimit(source, dest)) < 1e-6)
+            connection.close();
+        return connection;
     }
 
     public void closeConnection(String source, String dest) {

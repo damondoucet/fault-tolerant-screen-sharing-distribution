@@ -7,9 +7,9 @@ import java.io.InputStream;
  * Interface wrapping connections. This allows us to break the dependency on
  * sockets, which makes testing a lot easier.
  */
-public interface Connection<T> {
-    public T getSource();
-    public T getDest();
+public interface Connection<TKey> {
+    public TKey getSource();
+    public TKey getDest();
 
     /**
      * Used for reading Snapshots.

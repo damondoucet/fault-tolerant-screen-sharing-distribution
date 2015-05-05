@@ -29,6 +29,10 @@ public class InterruptableThreadSet {
         this.shouldExecute = null;
     }
 
+    public AtomicBoolean getShouldExecute() {
+        return shouldExecute;
+    }
+
     public void start() {
         checkState(shouldExecute == null,
                 "Should not start broadcaster again without stopping first");

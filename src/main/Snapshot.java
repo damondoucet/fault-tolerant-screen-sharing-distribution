@@ -2,6 +2,7 @@ package main;
 
 import com.google.common.primitives.Longs;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
+import main.util.Serialization;
 import main.util.Util;
 
 import javax.imageio.ImageIO;
@@ -13,6 +14,9 @@ import java.io.*;
  * frame indexes.
  */
 public class Snapshot {
+    // Note that writing includes this byte, but reading does not.
+    public final static byte SNAPSHOT_PREFIX = 0x50;
+
     private final long frameIndex;
     private final BufferedImage image;
 
@@ -64,30 +68,27 @@ public class Snapshot {
     // clean up the buffer after reading.
     public byte[] toBytes() throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        outputStream.write(SNAPSHOT_PREFIX);
         outputStream.write(Longs.toByteArray(frameIndex));
 
         ByteOutputStream imageOutput = imageToByteOutputStream();
-        outputStream.write(Longs.toByteArray(imageOutput.size()));
+        Serialization.writeLong(outputStream, imageOutput.size());
         imageOutput.writeTo(outputStream);
 
         return outputStream.toByteArray();
     }
 
-    private static long readLong(InputStream stream) throws IOException {
-        return Longs.fromByteArray(Util.read(stream, Long.BYTES));
-    }
-
     private static BufferedImage readImage(InputStream stream, long imageSize)
             throws IOException {
         return ImageIO.read(new ByteArrayInputStream(
-                Util.read(stream, (int)imageSize)));
+                Serialization.read(stream, (int) imageSize)));
     }
 
     // See comment above toBytes
     public static Snapshot fromInputStream(InputStream stream, boolean lossy)
             throws IOException {
-        long index = readLong(stream);
-        long imageSize = readLong(stream);
+        long index = Serialization.readLong(stream);
+        long imageSize = Serialization.readLong(stream);
         BufferedImage image = readImage(stream, imageSize);
 
         return new Snapshot(index, image, lossy);

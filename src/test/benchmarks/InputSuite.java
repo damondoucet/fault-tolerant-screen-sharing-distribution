@@ -7,6 +7,10 @@ import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
 import org.junit.Before;
 import org.junit.Test;
+import test.unit.network.protocols.KaryTreeNodeFactory;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Defines the set of benchmarks to be used and the set of protocols to test.
@@ -16,6 +20,8 @@ import org.junit.Test;
 public class InputSuite {
     // For descriptions of these inputs, see above their initializations in
     // init().
+
+    // TODO(ddoucet): what about large benchmarks? probably make another class?
     private Input oneClientNoFailures;
     private Input oneClientSlowNetwork;
     private Input twoClientsNoFailures;
@@ -120,18 +126,50 @@ public class InputSuite {
         resultSet.print();
     }
 
-    private ResultSet<String> runBasic(Input input) {
+    private ResultSet<String> runBasic(Input input) throws Exception {
         TestConnectionManager manager = new TestConnectionManager();
         return new Runner(
-                (key) -> createBasicBroadcaster(manager, key),
-                (key) -> createBasicClient(manager, key),
+                () -> createBasicBroadcaster(manager, Input.BROADCASTER),
+                key -> createBasicClient(manager, key),
                 manager,
                 input).run();
     }
 
+    private ResultSet<String> runKaryTree(int k, Input input) throws Exception {
+        TestConnectionManager manager = new TestConnectionManager();
+        KaryTreeNodeFactory factory = new KaryTreeNodeFactory(k);
+        return new Runner(
+                () -> factory.createBroadcaster(manager, Input.BROADCASTER),
+                key -> factory.createClient(manager, Input.BROADCASTER, key),
+                manager,
+                input).run();
+    }
+
+    private ResultSet<String> runBinaryTree(Input input) throws Exception {
+        return runKaryTree(2, input);
+    }
+
     @Test
-    public void benchmarkBasicProtocol() {
-        printResultSet(runBasic(oneClientNoFailures));
-        printResultSet(runBasic(oneClientSlowNetwork));
+    public void benchmarkBasicProtocol() throws Exception {
+        List<Input> inputs = Arrays.asList(oneClientNoFailures, oneClientSlowNetwork);
+        for (Input input : inputs)
+            printResultSet(runBasic(input));
+    }
+
+    // We don't test different values of K because these are pretty small
+    // benchmarks (no more than two clients). With larger numbers of clients,
+    // different values of K should be tested.
+    @Test
+    public void benchmarkBinaryTreeProtocol() throws Exception {
+        List<Input> inputs = Arrays.asList(
+                oneClientNoFailures,
+                oneClientSlowNetwork,
+                twoClientsNoFailures,
+                twoClientsOneFailure,
+                oneIsolatedThenNeeded,
+                chain);
+
+        for (Input input : inputs)
+            printResultSet(runBinaryTree(input));
     }
 }

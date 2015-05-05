@@ -1,6 +1,7 @@
 package test.unit;
 
 import main.util.RateLimitingInputStream;
+import main.util.Serialization;
 import main.util.Util;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -24,7 +25,7 @@ public class RateLimitingInputStreamTests {
                                double minSeconds,
                                double maxSeconds) throws IOException {
         long nanoStart = System.nanoTime();
-        Util.read(stream, numBytes);
+        Serialization.read(stream, numBytes);
         long nanoEnd = System.nanoTime();
         double durationSeconds = (nanoEnd - nanoStart) / 1e9;
 

@@ -2,9 +2,8 @@ package main.network.test;
 
 import main.network.Connection;
 import main.util.RateLimitingInputStream;
+import main.util.Serialization;
 import main.util.Util;
-
-import static com.google.common.base.Preconditions.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,14 +21,28 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TestConnection implements Connection<String> {
     // Wraps reading from the readQueue for getInputStream().
     private class TestConnectionInputStream extends InputStream {
+        private final AtomicBoolean closed;
+
+        public TestConnectionInputStream(AtomicBoolean closed) {
+            this.closed = closed;
+        }
+
         @Override
         public int read() throws IOException {
-            return Util.next(readQueue) & 0xff;
+            Byte value;
+            while ((value = readQueue.poll()) == null && !closed.get())
+                Util.sleepMillis(10);
+            if (closed.get())
+                throw new IOException("Stream closed");
+
+            return value & 0xff;
         }
     }
 
     // Used for closing the other end of a connection.
     private final TestConnectionManager manager;
+
+    private final AtomicBoolean closed;
 
     private final ConcurrentLinkedQueue<Byte> readQueue;
     private final ConcurrentLinkedQueue<Byte> writeQueue;
@@ -37,7 +50,6 @@ public class TestConnection implements Connection<String> {
     private final String source;
     private final String dest;
 
-    private final AtomicBoolean closed;
 
     public TestConnection(TestConnectionManager manager,
                           ConcurrentLinkedQueue<Byte> readQueue,
@@ -45,13 +57,13 @@ public class TestConnection implements Connection<String> {
                           String source,
                           String dest) {
         this.manager = manager;
+        this.closed = new AtomicBoolean(false);
         this.readQueue = readQueue;
         this.writeQueue = writeQueue;
-        this.inputStream = new RateLimitingInputStream(new TestConnectionInputStream());
+        this.inputStream = new RateLimitingInputStream(new TestConnectionInputStream(closed));
 
         this.source = source;
         this.dest = dest;
-        closed = new AtomicBoolean(false);
     }
 
     public String getSource() {
@@ -69,7 +81,7 @@ public class TestConnection implements Connection<String> {
 
     @Override
     public int read(byte[] bytes, int numBytes) throws IOException {
-        int bytesRead = Util.read(inputStream, bytes, numBytes);
+        int bytesRead = Serialization.read(inputStream, bytes, numBytes);
 
         if (closed.get())
             throw new IOException("Stream closed");

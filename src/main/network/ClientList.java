@@ -5,7 +5,6 @@ import main.util.Util;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -14,9 +13,9 @@ import static com.google.common.base.Preconditions.*;
 /**
  * Holds a list of connections to clients requesting snapshots.
  */
-public class ClientList<T> {
-    private final T key;
-    private final List<Connection<T>> connections;
+public class ClientList<TKey> {
+    private final TKey key;
+    private final List<Connection<TKey>> connections;
 
     // If connectionHandler != null, we'll spawn a new thread and run the
     // connectionHandler on it. When the connectionHandler returns, the
@@ -26,14 +25,14 @@ public class ClientList<T> {
     // When a new client connects, we send this to them if it isn't null.
     private final AtomicReference<Snapshot> mostRecentSnapshot;
 
-    public ClientList(T key, /* nullable */ Consumer<Connection> connectionHandler) {
+    public ClientList(TKey key, /* nullable */ Consumer<Connection> connectionHandler) {
         this.key = key;
         this.connections = Collections.synchronizedList(new LinkedList<>());
         this.connectionHandler = connectionHandler;
         this.mostRecentSnapshot = new AtomicReference<>();
     }
 
-    public void addConnection(Connection<T> connection) {
+    public void addConnection(Connection<TKey> connection) {
         checkArgument(connection.getSource().equals(key),
                 "Tried to add connection where source (%s) was not us (%s)",
                 connection.getSource(), key);
@@ -87,22 +86,26 @@ public class ClientList<T> {
         }
     }
 
-    public void writeBytesToConnection(Connection<T> connection, byte[] bytes)
-            throws IOException {
-        synchronized (connection) {
-            connection.write(bytes);
+    public void removeAll() {
+        synchronized (connections) {
+            for (Iterator<Connection<TKey>> it = connections.iterator(); it.hasNext(); ) {
+                it.next().close();
+                it.remove();
+            }
         }
     }
 
-    private void sendBytesToConnections(byte[] bytes) {
-        for (Iterator<Connection<T>> it  = connections.iterator(); it.hasNext(); ) {
-            Connection<T> connection = it.next();
-            try {
-                writeBytesToConnection(connection, bytes);
-            } catch (IOException e) {
-                Util.printException("Error writing to connection", e);
-                connection.close();
-                it.remove();
+    public void sendBytesToConnections(byte[] bytes) {
+        synchronized (connections) {
+            for (Iterator<Connection<TKey>> it  = connections.iterator(); it.hasNext(); ) {
+                Connection<TKey> connection = it.next();
+                try {
+                    Util.threadsafeWrite(connection, bytes);
+                } catch (IOException e) {
+                    Util.printException("Error writing to connection", e);
+                    connection.close();
+                    it.remove();
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ import test.unit.ImageUtil;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -19,7 +20,7 @@ import java.util.function.Function;
  * The protocol is defined by two functions: createBroadcaster() and createClient(index).
  */
 public class Runner {
-    private final Function<String, NetworkProtocol> createBroadcaster;
+    private final Callable<NetworkProtocol> createBroadcaster;
     private final Function<String, NetworkProtocol> createClient;
     private final Input input;
     private final RateLimitSchedule schedule;
@@ -31,7 +32,7 @@ public class Runner {
     private List<NetworkProtocol> clients;
     private Snapshot currentSnapshot;
 
-    public Runner(Function<String, NetworkProtocol> createBroadcaster,
+    public Runner(Callable<NetworkProtocol> createBroadcaster,
                   Function<String, NetworkProtocol> createClient,
                   TestConnectionManager manager,
                   Input input) {
@@ -44,9 +45,9 @@ public class Runner {
         this.currentRound = new AtomicInteger();
     }
 
-    private void initialize() {
+    private void initialize() throws Exception {
         schedule.initialize(input.clients);
-        broadcaster = createBroadcaster.apply(Input.BROADCASTER);
+        broadcaster = createBroadcaster.call();
         broadcaster.start();
         currentSnapshot = Snapshot.lossySnapshot(0, image);
 
@@ -99,7 +100,7 @@ public class Runner {
     }
 
     private void run(int round) {
-        System.out.println(input.name + " round " + round + ":");
+        System.out.println(input.name + " round " + round);
 
         currentRound.set(round);
         builder.startRound(round);
@@ -115,7 +116,7 @@ public class Runner {
             client.stop();
     }
 
-    public ResultSet<String> run() {
+    public ResultSet<String> run() throws Exception {
         initialize();
         for (int i = 0; i < input.numRounds; i++) {
             schedule.applyForRound(i);
