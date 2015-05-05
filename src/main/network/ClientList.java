@@ -5,6 +5,8 @@ import main.util.Util;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.*;
@@ -17,23 +19,40 @@ public class ClientList<T> {
     private final List<Connection<T>> connections;
 
     // If connectionHandler != null, we'll spawn a new thread and run the
-    // connectionHandler on it.
+    // connectionHandler on it. When the connectionHandler returns, the
+    // connection will be killed.
     private final Consumer<Connection> connectionHandler;
 
-    public ClientList(T key) {
-        this(key, null);
-    }
+    // When a new client connects, we send this to them if it isn't null.
+    private final AtomicReference<Snapshot> mostRecentSnapshot;
 
-    public ClientList(T key, Consumer<Connection> connectionHandler) {
+    public ClientList(T key, /* nullable */ Consumer<Connection> connectionHandler) {
         this.key = key;
         this.connections = Collections.synchronizedList(new LinkedList<>());
         this.connectionHandler = connectionHandler;
+        this.mostRecentSnapshot = new AtomicReference<>();
     }
 
     public void addConnection(Connection<T> connection) {
         checkArgument(connection.getSource().equals(key),
                 "Tried to add connection where source (%s) was not us (%s)",
                 connection.getSource(), key);
+
+        if (mostRecentSnapshot.get() != null) {
+            // Send the snapshot before we add it to the connections list,
+            // otherwise another thread may call sendSnapshot(), which would
+            // write to the connection simultaneously.
+            try {
+                byte[] bytes = getSnapshotBytes(mostRecentSnapshot.get());
+                if (bytes != null)
+                    connection.write(bytes);
+            } catch (IOException e) {
+                Util.printException(
+                        "Error writing most recent snapshot to new connection (dest "
+                                + connection.getDest() + ")", e);
+                return;  // No reason to add this connection if it just crashed
+            }
+        }
 
         connections.add(connection);
 
@@ -51,11 +70,9 @@ public class ClientList<T> {
         @Override
         public void run() {
             connectionHandler.accept(connection);
+            connection.close();
+            connections.removeIf(conn -> conn.getDest().equals(connection.getDest()));
         }
-    }
-
-    public void removeConnection(T dest) {
-        connections.removeIf((connection) -> connection.getDest().equals(dest));
     }
 
     private byte[] getSnapshotBytes(Snapshot snapshot) {
@@ -66,17 +83,23 @@ public class ClientList<T> {
                     String.format("Error converting snapshot %d to bytes:\n",
                             snapshot.getFrameIndex()),
                     e);
+            return null;
         }
-        return null;
+    }
+
+    public void writeBytesToConnection(Connection<T> connection, byte[] bytes)
+            throws IOException {
+        synchronized (connection) {
+            connection.write(bytes);
+        }
     }
 
     private void sendBytesToConnections(byte[] bytes) {
         for (Iterator<Connection<T>> it  = connections.iterator(); it.hasNext(); ) {
             Connection<T> connection = it.next();
             try {
-                connection.write(bytes);
-            } catch (IOException e) {  // skip this client
-                // TODO(ddoucet): maybe this is too aggressive?
+                writeBytesToConnection(connection, bytes);
+            } catch (IOException e) {
                 Util.printException("Error writing to connection", e);
                 connection.close();
                 it.remove();
@@ -85,6 +108,8 @@ public class ClientList<T> {
     }
 
     public void sendSnapshot(Snapshot snapshot) {
+        mostRecentSnapshot.set(snapshot);
+
         if (connections.size() == 0)
             return;
 

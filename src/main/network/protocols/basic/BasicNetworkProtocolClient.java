@@ -1,5 +1,6 @@
 package main.network.protocols.basic;
 
+import main.network.protocols.NetworkProtocolClient;
 import main.util.InterruptableThreadSet;
 import main.Snapshot;
 import main.network.Connection;
@@ -13,25 +14,21 @@ import java.util.Arrays;
 /**
  * Client for the basic network protocol.
  */
-public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
+public class BasicNetworkProtocolClient<T> extends NetworkProtocolClient<T> {
     private final T broadcasterKey;
     private final InterruptableThreadSet threadSet;
-    private final boolean lossy;
-    private boolean hasReceivedSnapshot;
 
     private Connection<T> connection;
 
     private BasicNetworkProtocolClient(ConnectionFactory<T> connectionFactory,
-                                      T broadcasterKey,
-                                      boolean lossy) {
-        super(connectionFactory);
+                                       T broadcasterKey,
+                                       boolean lossy) {
+        super(connectionFactory, lossy);
 
         this.broadcasterKey = broadcasterKey;
         this.threadSet = new InterruptableThreadSet(
                 Arrays.asList(this::receiveSnapshots),
                 null);
-        this.lossy = lossy;
-        hasReceivedSnapshot = false;
 
         this.connection = null;
     }
@@ -67,14 +64,10 @@ public class BasicNetworkProtocolClient<T> extends BasicNetworkProtocol<T> {
         try {
             if (connection == null) {
                 connection = connectionFactory.openConnection(broadcasterKey);
-
-                if (connection != null && !hasReceivedSnapshot)
-                    connection.write(new byte[] { REQUEST_SNAPSHOT });
                 return;  // give the thread a chance to die
             }
 
-            onSnapshot(Snapshot.fromInputStream(connection.getInputStream(), lossy));
-            hasReceivedSnapshot = true;
+            onSnapshot(readSnapshot(connection));
         } catch (IOException e) {
             if (connection != null)
                 connection.close();

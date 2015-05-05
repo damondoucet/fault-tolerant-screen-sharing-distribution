@@ -1,4 +1,5 @@
 package main.network.protocols;
+
 import main.Snapshot;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
