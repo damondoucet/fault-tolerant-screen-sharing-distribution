@@ -19,24 +19,12 @@ public class BasicTests {
     // How long until a client should have received the snapshot.
     private final static int CLIENT_DELAY_MILLIS = 700;
 
-    private static NetworkProtocol createBroadcaster(TestConnectionManager manager) {
-        manager.onNewClient(TestState.BROADCASTER_KEY);
-        return new BasicNetworkProtocolBroadcaster<>(
-                new TestConnectionFactory(manager, TestState.BROADCASTER_KEY));
-    }
-
-    private static NetworkProtocol createClient(TestConnectionManager manager,
-                                                String clientKey) {
-        manager.onNewClient(clientKey);
-        return BasicNetworkProtocolClient.losslessClient(
-                new TestConnectionFactory(manager, clientKey), TestState.BROADCASTER_KEY);
-    }
-
     private void runTest(int numClients, Consumer<TestState> test) {
+        ProtocolFactory factory = new ProtocolFactory(TestState.BROADCASTER_KEY);
         TestState.runTest(
                 numClients,
-                BasicTests::createBroadcaster,
-                BasicTests::createClient,
+                factory::createBasicBroadcaster,
+                factory::createBasicClient,
                 test);
     }
 

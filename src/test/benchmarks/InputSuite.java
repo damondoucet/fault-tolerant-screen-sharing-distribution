@@ -1,13 +1,9 @@
 package test.benchmarks;
 
-import main.network.protocols.NetworkProtocol;
-import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
-import main.network.protocols.basic.BasicNetworkProtocolClient;
-import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
 import org.junit.Before;
 import org.junit.Test;
-import test.unit.network.protocols.KaryTreeNodeFactory;
+import test.unit.network.protocols.ProtocolFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -108,39 +104,26 @@ public class InputSuite {
                         .build());
     }
 
-    private static NetworkProtocol createBasicBroadcaster(TestConnectionManager manager, String key) {
-        NetworkProtocol broadcaster = new BasicNetworkProtocolBroadcaster<>(
-                new TestConnectionFactory(manager, key));
-        manager.onNewClient(key);
-        return broadcaster;
-    }
-
-    private static NetworkProtocol createBasicClient(TestConnectionManager manager, String key) {
-         NetworkProtocol client = BasicNetworkProtocolClient.lossyClient(
-                 new TestConnectionFactory(manager, key), Input.BROADCASTER);
-        manager.onNewClient(key);
-        return client;
-    }
-
     private void printResultSet(ResultSet<String> resultSet) {
         resultSet.print();
     }
 
     private ResultSet<String> runBasic(Input input) throws Exception {
         TestConnectionManager manager = new TestConnectionManager();
+        ProtocolFactory factory = new ProtocolFactory(Input.BROADCASTER);
         return new Runner(
-                () -> createBasicBroadcaster(manager, Input.BROADCASTER),
-                key -> createBasicClient(manager, key),
+                () -> factory.createBasicBroadcaster(manager),
+                key -> factory.createBasicClient(manager, key),
                 manager,
                 input).run();
     }
 
     private ResultSet<String> runKaryTree(int k, Input input) throws Exception {
         TestConnectionManager manager = new TestConnectionManager();
-        KaryTreeNodeFactory factory = new KaryTreeNodeFactory(k);
+        ProtocolFactory factory = new ProtocolFactory(Input.BROADCASTER);
         return new Runner(
-                () -> factory.createBroadcaster(manager, Input.BROADCASTER),
-                key -> factory.createClient(manager, Input.BROADCASTER, key),
+                () -> factory.createTreeBroadcaster(manager),
+                key -> factory.createTreeClient(manager, key),
                 manager,
                 input).run();
     }

@@ -12,27 +12,19 @@ import java.util.function.Consumer;
 /**
  * Tests for the KaryTreeNetworkProtocol using TestConnections.
  */
-public class KaryTreeTests {
+public class TreeTests {
     private final static int CONNECTION_DELAY_MILLIS = 200;
 
     // How long until a client should have received the snapshot.
     private final static int CLIENT_DELAY_MILLIS = 700;
 
-    private void runTest(int numClients, int k, Consumer<TestState> test) {
-        KaryTreeNodeFactory factory = new KaryTreeNodeFactory(k);
+    private void runTest(int numClients, Consumer<TestState> test) {
+        ProtocolFactory factory = new ProtocolFactory(TestState.BROADCASTER_KEY);
         TestState.runTest(
                 numClients,
-                (manager) -> factory.createBroadcaster(manager, TestState.BROADCASTER_KEY),
-                (manager, key) -> factory.createClient(manager, TestState.BROADCASTER_KEY, key),
+                factory::createTreeBroadcaster,
+                factory::createTreeClient,
                 test);
-    }
-
-    private void runUnaryTest(int numClients, Consumer<TestState> test) {
-        runTest(numClients, 1, test);
-    }
-
-    private void runBinaryTest(int numClients, Consumer<TestState> test) {
-        runTest(numClients, 2, test);
     }
 
     private void assertCorrectParent(String expectedParent, NetworkProtocol node) {
@@ -43,7 +35,7 @@ public class KaryTreeTests {
 
     @Test
     public void testOneClientTwoImages() {
-        runUnaryTest(1, (state) -> {
+        runTest(1, (state) -> {
             Util.sleepMillis(CONNECTION_DELAY_MILLIS);
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(0));
 
@@ -57,10 +49,9 @@ public class KaryTreeTests {
         });
     }
 
-    // With two clients, K=2 should have both connecting to the broadcaster
     @Test
-    public void tesTwoClientsTwoImages() {
-        runBinaryTest(2, (state) -> {
+    public void testTwoClientsTwoImages() {
+        runTest(2, (state) -> {
             Util.sleepMillis(CONNECTION_DELAY_MILLIS);
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(0));
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(1));
@@ -95,31 +86,9 @@ public class KaryTreeTests {
         }
     }
 
-    // Test that with K=1 and no failures, only one node is connected to the
-    // broadcaster.
-    @Test
-    public void testUnaryTreeTwoClients() {
-        runBinaryTest(2, (state) -> {
-            Util.sleepMillis(CONNECTION_DELAY_MILLIS);
-            checkUnary(state.clients);
-
-            state.broadcaster.insertSnapshot(state.snapshots[0]);
-            state.broadcaster.insertSnapshot(state.snapshots[1]);
-            Util.sleepMillis(2 * CLIENT_DELAY_MILLIS);
-
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(0).poll());
-            assertEquals(state.snapshots[1], state.clientOutputQueues.get(0).poll());
-            assertTrue(state.clientOutputQueues.get(0).isEmpty());
-
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(1).poll());
-            assertEquals(state.snapshots[1], state.clientOutputQueues.get(1).poll());
-            assertTrue(state.clientOutputQueues.get(1).isEmpty());
-        });
-    }
-
     @Test
     public void testTwoClientsImageFailImage() {
-        runBinaryTest(2, (state) -> {
+        runTest(2, (state) -> {
             Util.sleepMillis(CONNECTION_DELAY_MILLIS);
             checkUnary(state.clients);
 
@@ -145,36 +114,11 @@ public class KaryTreeTests {
         });
     }
 
-    // Check that the K=1 is only a suggestion. Create a unary tree then
-    // destroy the connection between the two nodes and make sure both clients
-    // still receive the snapshot.
-    @Test
-    public void testFailureBetweenNodes() {
-        runUnaryTest(2, (state) -> {
-            Util.sleepMillis(CONNECTION_DELAY_MILLIS);
-            checkUnary(state.clients);
-
-            // Now insert failure and wait for reconnection, then insert the
-            // snapshot.
-            state.manager.setRateLimit(TestState.CLIENT_KEYS[0], TestState.CLIENT_KEYS[1], 0);
-            Util.sleepMillis(CONNECTION_DELAY_MILLIS);
-
-            state.broadcaster.insertSnapshot(state.snapshots[0]);
-            Util.sleepMillis(CLIENT_DELAY_MILLIS);
-
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(0).poll());
-            assertTrue(state.clientOutputQueues.get(0).isEmpty());
-
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(1).poll());
-            assertTrue(state.clientOutputQueues.get(1).isEmpty());
-        });
-    }
-
     // Create a failure such that client 0 must be client 1's parent. Then
     // change the failures so that client 1 must be client 0's parent.
     @Test
     public void testChildMustBecomeParent() {
-        runBinaryTest(2, (state) -> {
+        runTest(2, (state) -> {
             // First give time for topology information to propagate.
             Util.sleepMillis(CONNECTION_DELAY_MILLIS);
 
