@@ -40,7 +40,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     private final static byte STATE_ACK = 0x78;  // acknowledge receipt of state
 
     // How long to wait between sending states to the parent in ns.
-    private final static long NANO_SEND_STATE_DELAY = 20000000;  // 20ms
+    private final static long NANO_SEND_STATE_DELAY = 5000000;  // 5ms
 
     // After this many missed pings, consider the connection dead.
     private final static int MISSED_PING_THRESHOLD = 5;
@@ -48,6 +48,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     private final static long TIMEOUT_MILLIS =
             NANO_SEND_STATE_DELAY * MISSED_PING_THRESHOLD / 1000000;
 
+    private final boolean isBroadcaster;
     private final Topology<TKey> topology;
     private final ConcurrentLinkedQueue<Snapshot> snapshotQueue;
     private final InterruptableThreadSet threadSet;
@@ -64,7 +65,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                                     boolean lossy) {
         super(connectionFactory, lossy);
 
-        boolean isBroadcaster = connectionFactory.getKey().equals(broadcasterKey);
+        this.isBroadcaster = connectionFactory.getKey().equals(broadcasterKey);
 
         this.topology = new Topology<>(broadcasterKey, connectionFactory.getKey(), k);
         this.snapshotQueue = new ConcurrentLinkedQueue<>();
@@ -83,13 +84,16 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
 
     private List<Runnable> getThreadFuncs(boolean isBroadcaster) {
         if (isBroadcaster)
-            return Arrays.asList(this::acceptConnections, this::sendSnapshot);
+            return Arrays.asList(
+                    this::acceptConnections,
+                    this::sendSnapshot,
+                    this::maybeSendState);
         else
             return Arrays.asList(
                     this::acceptConnections,
                     this::sendSnapshot,
                     this::readFromParent,
-                    this::maybeSendStateToParent);
+                    this::maybeSendState);
     }
 
     // Used for testing
@@ -154,8 +158,8 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 Util.sleepMillis(10);
             }
         } catch (Exception e) {
-            Util.printException(
-                    "Error handling child (dest " + child.getDest() + ")", e);
+            System.out.printf("%s error handling child %s\n",
+                    connectionFactory.getKey(), child.getDest());
         } finally {
             // We don't need to close the connection here; the client list will
             // handle that when we return. We just need to remove the child
@@ -185,14 +189,25 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         previousSendStateNano = System.nanoTime();
     }
 
+    // TODO(ddoucet): these next two methods fucking suck
+    private void sendStateToChildren() throws IOException {
+        clientList.sendBytesToConnections(
+                topology.serializeTopology(STATE_PREFIX));
+    }
+
     // Sends the state to the parent every NANO_SEND_STATE_DELAY ns.
-    private void maybeSendStateToParent() {
+    private void maybeSendState() {
         try {
-            if (System.nanoTime() - previousSendStateNano >= NANO_SEND_STATE_DELAY)
-                sendStateToParent();
+            if (System.nanoTime() - previousSendStateNano >= NANO_SEND_STATE_DELAY) {
+                if (isBroadcaster)
+                    sendStateToChildren();
+                else
+                    sendStateToParent();
+            }
         } catch (Exception e) {
             closeParent();
-            Util.printException("Error sending state to parent", e);
+            System.out.printf("%s error sending state to parent %s\n",
+                    connectionFactory.getKey(), getParentKey());
         }
     }
 
@@ -210,6 +225,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 throw new Exception("Unable to find parent to connect to");
         }
 
+        System.out.printf("%s opening with %s\n", connectionFactory.getKey(), parent);
         Connection<TKey> connection = connectionFactory.openConnection(parent);
         parentConnection.set(connection);
         topology.setParent(connection.getDest());
@@ -235,8 +251,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 onSnapshot(readSnapshot(connection, -1));
             else if (prefix == STATE_PREFIX) {
                 topology.updateNonDescendantInfo(stream);
-                clientList.sendBytesToConnections(
-                        topology.serializeTopology(STATE_PREFIX));
+                sendStateToChildren();
             } else if (prefix != STATE_ACK)
                 System.err.printf(
                     "%s read unrecognized prefix (%s) from parent %s\n",
@@ -245,7 +260,8 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                         connection.getDest());
         } catch (Exception e) {
             closeParent();
-            Util.printException("Error reading from parent", e);
+            System.out.printf("%s error reading from parent %s\n",
+                    connectionFactory.getKey(), getParentKey());
         }
     }
 

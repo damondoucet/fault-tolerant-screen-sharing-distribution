@@ -177,6 +177,10 @@ public class KaryTreeTests {
     @Test
     public void testChildMustBecomeParent() {
         runBinaryTest(2, (state) -> {
+            // First give time for topology information to propagate.
+            Util.sleepMillis(CONNECTION_DELAY_MILLIS);
+
+            // Now kill the connection and make sure it connects correctly.
             state.manager.setRateLimit(TestState.BROADCASTER_KEY, TestState.CLIENT_KEYS[1], 0);
             Util.sleepMillis(CONNECTION_DELAY_MILLIS);
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(0));

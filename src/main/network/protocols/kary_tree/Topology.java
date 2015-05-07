@@ -103,6 +103,7 @@ public class Topology<TKey> {
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
             throws IOException {
+        System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
         updateEdgeLocked(parentKey, stream);
     }
 
