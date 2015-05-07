@@ -104,7 +104,7 @@ public class Topology<TKey> {
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
             throws IOException {
-        System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
+        // System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
         updateEdgeLocked(parentKey, stream);
     }
 
@@ -114,8 +114,9 @@ public class Topology<TKey> {
 
         long numNodes = Serialization.readLong(stream);
         for (int i = 0; i < numNodes; i++) {
-            TKey node = Serialization.deserialize(stream);
-            TKey parent = Serialization.deserialize(stream);
+            // This really blows
+            TKey node = Serialization.deserialize(stream, (Class<TKey>)edge.getClass());
+            TKey parent = Serialization.deserialize(stream, (Class<TKey>)edge.getClass());
             nodeToParent.put(node, parent);
         }
 
@@ -129,22 +130,23 @@ public class Topology<TKey> {
     }
 
     private static <TKey> void writeMapToStream(OutputStream stream, Map<TKey, TKey> nodeToParent)
-            throws IOException {
+            throws Exception {
         for (TKey node : nodeToParent.keySet()) {
+            System.out.println("serializing");
             stream.write(Serialization.serialize(node));
             stream.write(Serialization.serialize(nodeToParent.get(node)));
         }
     }
 
     private static <TKey> void writeMapsToStream(OutputStream stream, Collection<Map<TKey, TKey>> maps)
-            throws IOException {
+            throws Exception {
         Serialization.writeLong(stream, totalNodes(maps));
         for (Map<TKey, TKey> map : maps)
             writeMapToStream(stream, map);
     }
 
     // Should only be called while this is locked.
-    private byte[] serializeExceptEdgeLocked(byte prefix, TKey edge) throws IOException {
+    private byte[] serializeExceptEdgeLocked(byte prefix, TKey edge) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(prefix);
 
@@ -157,11 +159,13 @@ public class Topology<TKey> {
         return baos.toByteArray();
     }
 
-    public synchronized byte[] serializeDescendantInfo(byte prefix) throws IOException {
+    public synchronized byte[] serializeDescendantInfo(byte prefix)
+            throws Exception {
         return serializeExceptEdgeLocked(prefix, parentKey);
     }
 
-    public synchronized byte[] serializeExceptChild(byte prefix, TKey child) throws IOException {
+    public synchronized byte[] serializeExceptChild(byte prefix, TKey child)
+            throws Exception {
         return serializeExceptEdgeLocked(prefix, child);
     }
 

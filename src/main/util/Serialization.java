@@ -1,13 +1,15 @@
 package main.util;
 
+import com.google.common.base.Charsets;
 import com.google.common.primitives.Longs;
+import main.network.SocketInformation;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -16,6 +18,8 @@ import static com.google.common.base.Preconditions.checkArgument;
  * protocols).
  */
 public class Serialization {
+    private static Charset charset = Charset.forName("UTF-8");
+
     private Serialization() {}
 
     public static int read(InputStream inputStream, byte[] bytes, int numBytes) throws IOException {
@@ -60,11 +64,65 @@ public class Serialization {
         stream.write(Longs.toByteArray(value));
     }
 
-    public static <T> T deserialize(InputStream stream) throws IOException {
+    // These methods suck :/
+    public static <T> T deserialize(InputStream stream, Class<T> type) throws IOException {
+        if (type.equals(String.class))
+            return (T)stringFromStream(stream);
+        else if (type.equals(SocketInformation.class))
+            return (T)sockInfoFromStream(stream);
         throw new NotImplementedException();
     }
 
-    public static <T> byte[] serialize(T obj) {
+    public static <T> byte[] serialize(T obj) throws Exception {
+        if (obj.getClass().equals(String.class)) {
+            return writeObj(obj, Serialization::stringToStream);
+        } else if (obj.getClass().equals(SocketInformation.class))
+            return writeObj(obj, Serialization::sockInfoToStream);
         throw new NotImplementedException();
+    }
+
+    private static <T> byte[] writeObj(T obj, BiConsumer<OutputStream, Object> writer) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writer.accept(baos, obj);
+        return baos.toByteArray();
+    }
+
+    private static String stringFromStream(InputStream stream)
+            throws IOException {
+        int length = (int)readLong(stream);
+        byte[] bytes = read(stream, length);
+
+        return new String(bytes, Charsets.UTF_8);
+    }
+
+    private static void stringToStream(OutputStream stream, Object obj) {
+        String value = (String)obj;
+        byte[] bytes = value.getBytes(Charsets.UTF_8);
+
+        try {
+            writeLong(stream, bytes.length);
+            stream.write(bytes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static SocketInformation sockInfoFromStream(InputStream stream)
+            throws IOException {
+        String ip = stringFromStream(stream);
+        int port = (int)readLong(stream);
+
+        return new SocketInformation(ip, port);
+    }
+
+    private static void sockInfoToStream(OutputStream stream, Object obj) {
+        SocketInformation value = (SocketInformation)obj;
+
+        try {
+            stringToStream(stream, value.ip);
+            stream.write(Longs.toByteArray(value.port));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

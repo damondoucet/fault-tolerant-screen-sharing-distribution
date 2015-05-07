@@ -176,7 +176,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         clientList.removeAll();
     }
 
-    private void sendStateToParent() throws IOException {
+    private void sendStateToParent() throws Exception {
         Connection<TKey> parent = parentConnection.get();
         if (parent != null) {
             Util.threadsafeWrite(
