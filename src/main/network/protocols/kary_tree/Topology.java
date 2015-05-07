@@ -38,6 +38,10 @@ import java.util.stream.Collectors;
  *
  * The public methods of this class are synchronized, since a lot of the data
  * is tightly-coupled (e.g. the two maps).
+ *
+ * TODO(ddoucet): check for cycles; disconnect from children if one is found
+ *      (make sure to call disconnect() on ParentCandidateScanner when searching
+ *      for a new parent afterward)
  */
 public class Topology<TKey> {
     private final TKey broadcasterKey;
@@ -142,12 +146,13 @@ public class Topology<TKey> {
             writeMapToStream(stream, map);
     }
 
-    public synchronized byte[] serializeDescendantInfo(byte prefix) throws IOException {
+    // Should only be called while this is locked.
+    private byte[] serializeExceptEdgeLocked(byte prefix, TKey edge) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         baos.write(prefix);
 
         List<Map<TKey, TKey>> maps = destToNodeToParent.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(parentKey))
+                .filter(entry -> !entry.getKey().equals(edge))
                 .map(entry -> entry.getValue())
                 .collect(Collectors.toList());
         writeMapsToStream(baos, maps);
@@ -155,11 +160,12 @@ public class Topology<TKey> {
         return baos.toByteArray();
     }
 
-    public synchronized byte[] serializeTopology(byte prefix) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.write(prefix);
-        writeMapsToStream(baos, destToNodeToParent.values());
-        return baos.toByteArray();
+    public synchronized byte[] serializeDescendantInfo(byte prefix) throws IOException {
+        return serializeExceptEdgeLocked(prefix, parentKey);
+    }
+
+    public synchronized byte[] serializeExceptChild(byte prefix, TKey child) throws IOException {
+        return serializeExceptEdgeLocked(prefix, child);
     }
 
     // Removes a child and all of its descendants from the map. This is called

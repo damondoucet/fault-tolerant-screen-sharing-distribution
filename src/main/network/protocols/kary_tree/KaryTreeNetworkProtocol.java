@@ -86,8 +86,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         if (isBroadcaster)
             return Arrays.asList(
                     this::acceptConnections,
-                    this::sendSnapshot,
-                    this::maybeSendState);
+                    this::sendSnapshot);
         else
             return Arrays.asList(
                     this::acceptConnections,
@@ -151,6 +150,7 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 if (prefix == STATE_PREFIX) {
                     topology.updateChildInfo(child.getDest(), stream);
                     Util.threadsafeWrite(child, new byte[] { STATE_ACK });
+                    Util.threadsafeWrite(child, topology.serializeExceptChild(STATE_PREFIX, child.getDest()));
                 } else
                     System.err.printf("Illegal prefix %s when reading from %s\n",
                             Byte.toString(prefix), child.getDest().toString());
@@ -189,21 +189,11 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         previousSendStateNano = System.nanoTime();
     }
 
-    // TODO(ddoucet): these next two methods fucking suck
-    private void sendStateToChildren() throws IOException {
-        clientList.sendBytesToConnections(
-                topology.serializeTopology(STATE_PREFIX));
-    }
-
     // Sends the state to the parent every NANO_SEND_STATE_DELAY ns.
     private void maybeSendState() {
         try {
-            if (System.nanoTime() - previousSendStateNano >= NANO_SEND_STATE_DELAY) {
-                if (isBroadcaster)
-                    sendStateToChildren();
-                else
-                    sendStateToParent();
-            }
+            if (System.nanoTime() - previousSendStateNano >= NANO_SEND_STATE_DELAY)
+                sendStateToParent();
         } catch (Exception e) {
             closeParent();
             System.out.printf("%s error sending state to parent %s\n",
@@ -249,10 +239,9 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
 
             if (prefix == Snapshot.SNAPSHOT_PREFIX)
                 onSnapshot(readSnapshot(connection, -1));
-            else if (prefix == STATE_PREFIX) {
+            else if (prefix == STATE_PREFIX)
                 topology.updateNonDescendantInfo(stream);
-                sendStateToChildren();
-            } else if (prefix != STATE_ACK)
+            else if (prefix != STATE_ACK)
                 System.err.printf(
                     "%s read unrecognized prefix (%s) from parent %s\n",
                         connectionFactory.getKey(),
