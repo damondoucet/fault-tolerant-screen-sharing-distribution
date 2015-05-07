@@ -3,6 +3,8 @@ package main.network.test;
 import main.network.Connection;
 import main.network.ConnectionFactory;
 
+import java.io.IOException;
+
 /**
  * Handles creating connections for a given test client.
  *
@@ -27,7 +29,8 @@ public class TestConnectionFactory implements ConnectionFactory<String> {
     }
 
     @Override
-    public Connection<String> openConnection(String dest) {
+    public Connection<String> openConnection(String dest)
+            throws IOException {
         return manager.openConnection(client, dest);
     }
 

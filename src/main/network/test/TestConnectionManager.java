@@ -3,6 +3,7 @@ package main.network.test;
 import main.network.Connection;
 import main.util.Util;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -125,14 +126,18 @@ public class TestConnectionManager {
     }
 
     public Connection<String> acceptConnection(String forKey) {
-        String source = Util.next(awaitingConnections.get(forKey));
+        while (true) {
+            String source = Util.next(awaitingConnections.get(forKey));
 
-        // We want to return a connection so that the connecting client is our
-        // destination and we are the source.
-         Connection<String> connection = createConnection(forKey, source);
-        if (Math.abs(getRateLimit(forKey, source)) < 1e-6)
-            connection.close();
-        return connection;
+            // We want to return a connection so that the connecting client is our
+            // destination and we are the source.
+            Connection<String> connection = createConnection(forKey, source);
+            if (Math.abs(getRateLimit(forKey, source)) < 1e-6) {
+                connection.close();
+                continue;
+            }
+            return connection;
+        }
     }
 
     private TestConnection waitForConnection(String source, String dest) {
@@ -152,14 +157,17 @@ public class TestConnectionManager {
                 source, dest);
     }
 
-    public Connection<String> openConnection(String source, String dest) {
+    public Connection<String> openConnection(String source, String dest)
+            throws IOException {
         // Insert ourselves into the destination's awaitingConnections list.
         awaitingConnections.get(dest).add(source);
 
         // Wait until we have a queue in connectionData and return that.
         Connection<String> connection = waitForConnection(source, dest);
-        if (Math.abs(getRateLimit(source, dest)) < 1e-6)
+        if (Math.abs(getRateLimit(source, dest)) < 1e-6) {
             connection.close();
+            throw new IOException("Unable to open connection from " + source + " to " + dest);
+        }
         return connection;
     }
 
