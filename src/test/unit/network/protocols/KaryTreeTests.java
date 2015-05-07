@@ -1,9 +1,7 @@
 package test.unit.network.protocols;
 
 import main.network.protocols.NetworkProtocol;
-import main.network.protocols.kary_tree.KaryTreeNetworkProtocol;
-import main.network.test.TestConnectionFactory;
-import main.network.test.TestConnectionManager;
+import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.Util;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -38,8 +36,8 @@ public class KaryTreeTests {
     }
 
     private void assertCorrectParent(String expectedParent, NetworkProtocol node) {
-        KaryTreeNetworkProtocol<String> castedNode =
-                (KaryTreeNetworkProtocol<String>)node;
+        TreeNetworkProtocol<String> castedNode =
+                (TreeNetworkProtocol<String>)node;
         assertEquals(expectedParent, castedNode.getParentKey());
     }
 
@@ -86,8 +84,8 @@ public class KaryTreeTests {
     // Expects exactly two clients.
     private void checkUnary(List<NetworkProtocol> clients) {
         // This is sort of gross. Sorry. :/
-        KaryTreeNetworkProtocol<String> c0 =
-                (KaryTreeNetworkProtocol<String>)clients.get(0);
+        TreeNetworkProtocol<String> c0 =
+                (TreeNetworkProtocol<String>)clients.get(0);
 
         if (c0.getParentKey().equals(TestState.BROADCASTER_KEY))
             assertCorrectParent(TestState.CLIENT_KEYS[0], clients.get(1));

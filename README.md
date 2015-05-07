@@ -1,5 +1,5 @@
-# P2P Scalable Screensharing
-6.824 Final Project -- A computer's screen is broadcasted over a peer-to-peer distribution network
+# Fault-Tolerant Screen-Sharing Distribution
+6.824 Final Project -- A computer's screen is broadcasted through a fault-tolerant distribution network
 
 Requirements
 ============

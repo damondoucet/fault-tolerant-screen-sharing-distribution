@@ -1,4 +1,4 @@
-package main.network.protocols.kary_tree;
+package main.network.protocols.tree;
 
 import main.util.Serialization;
 
@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Manages the topology for the K-ary Tree protocol.
+ * Manages the topology for the tree protocol.
  *
  * There are two components to the topology: information the node receives from
  * its descendants, and information it receives from its parent.
@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
 public class Topology<TKey> {
     private final TKey broadcasterKey;
     private final TKey currentNodeKey;
-    private final int k;
 
     // See description above class
     private final Map<TKey, Map<TKey, TKey>> destToNodeToParent;
@@ -57,10 +56,9 @@ public class Topology<TKey> {
 
     private TKey parentKey;
 
-    public Topology(TKey broadcasterKey, TKey currentNodeKey, int k) {
+    public Topology(TKey broadcasterKey, TKey currentNodeKey) {
         this.broadcasterKey = broadcasterKey;
         this.currentNodeKey = currentNodeKey;
-        this.k = k;
 
         destToNodeToParent = new HashMap<>();
         nodeToChildren = new HashMap<>();
@@ -73,7 +71,6 @@ public class Topology<TKey> {
             nodeToChildrenCopy.put(entry.getKey(), new ArrayList<>(entry.getValue()));
 
         return new ParentCandidateScanner<>(
-                k,
                 broadcasterKey,
                 currentNodeKey,
                 parentKey,

@@ -1,7 +1,7 @@
 package test.unit.network.protocols;
 
 import main.network.protocols.NetworkProtocol;
-import main.network.protocols.kary_tree.KaryTreeNetworkProtocol;
+import main.network.protocols.tree.TreeNetworkProtocol;
 import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
 
@@ -23,10 +23,9 @@ public class KaryTreeNodeFactory {
                                         String broadcasterKey,
                                         String clientKey) {
         manager.onNewClient(clientKey);
-        return KaryTreeNetworkProtocol.losslessClient(
+        return TreeNetworkProtocol.losslessClient(
                 new TestConnectionFactory(manager, clientKey),
-                TestState.BROADCASTER_KEY,
-                k);
+                broadcasterKey);
     }
 }
 

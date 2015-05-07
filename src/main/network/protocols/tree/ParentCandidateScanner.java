@@ -1,4 +1,4 @@
-package main.network.protocols.kary_tree;
+package main.network.protocols.tree;
 
 import java.util.*;
 
@@ -31,7 +31,6 @@ import java.util.*;
  * want?
  */
 public class ParentCandidateScanner<TKey> {
-    private final int k;
     private final TKey broadcasterKey;
     private final TKey parentKey;
     private final TKey currentNodeKey;
@@ -48,15 +47,12 @@ public class ParentCandidateScanner<TKey> {
     private final Set<TKey> suggestedNodes;
 
     private boolean disconnected;
-    private boolean hasSuggestedAllUndersubscribedNodes;
 
-    public ParentCandidateScanner(int k,
-                                  TKey broadcasterKey,
+    public ParentCandidateScanner(TKey broadcasterKey,
                                   TKey currentNodeKey,
                                   TKey parentKey,
                                   Map<TKey, List<TKey>> nodeToChildren) {
         System.out.printf("%s scanner has %s children\n", currentNodeKey, nodeToChildren.size());
-        this.k = k;
         this.broadcasterKey = broadcasterKey;
         this.parentKey = parentKey;
         this.currentNodeKey = currentNodeKey;
@@ -65,7 +61,6 @@ public class ParentCandidateScanner<TKey> {
         this.nodesToInspect = new ArrayDeque<>();
         this.suggestedNodes = new HashSet<>();
         this.disconnected = false;
-        this.hasSuggestedAllUndersubscribedNodes = false;
 
         nodesToInspect.add(broadcasterKey);
     }
@@ -98,7 +93,7 @@ public class ParentCandidateScanner<TKey> {
 
         TKey node;
         do {
-            node = readNextFromQueue();
+            node = nodesToInspect.poll();
             if (node == null)
                 return null;
 
@@ -112,26 +107,9 @@ public class ParentCandidateScanner<TKey> {
         return node;
     }
 
-    private TKey readNextFromQueue() {
-        if (nodesToInspect.isEmpty()) {
-            if (hasSuggestedAllUndersubscribedNodes) {
-                // Either we're disconnected, and there are no more nodes, or
-                // we're not disconnected and they can disconnect to get more
-                // nodes to inspect.
-                return null;
-            }
-
-            hasSuggestedAllUndersubscribedNodes = true;
-            // Now look through nodes with more than K nodes
-            nodesToInspect.add(broadcasterKey);
-        }
-
-        return nodesToInspect.poll();
-    }
-
     private boolean shouldSuggestNode(TKey node) {
-        return !node.equals(parentKey) && !node.equals(currentNodeKey) &&
-                !suggestedNodes.contains(node) &&
-                (hasSuggestedAllUndersubscribedNodes || nodeToChildren.get(node).size() < k);
+        return !node.equals(parentKey) &&
+                !node.equals(currentNodeKey) &&
+                !suggestedNodes.contains(node);
     }
 }

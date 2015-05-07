@@ -1,7 +1,7 @@
 package test.unit.network.protocols;
 
 import com.google.common.collect.ImmutableMap;
-import main.network.protocols.kary_tree.ParentCandidateScanner;
+import main.network.protocols.tree.ParentCandidateScanner;
 import org.junit.Test;
 
 import java.util.*;
@@ -27,14 +27,13 @@ public class ParentCandidateScannerTests {
     // for a new parent until the scanner can give no more.
     // expectedOrdering is the ENTIRE list--the ordering the scanner would
     // suggest if it were called until it had no more nodes to suggest.
-    private void test(int k,
-                      String broadcaster,
+    private void test(String broadcaster,
                       String node,
                       String parent,
                       Map<String, List<String>> nodeToChildren,
                       List<String> expectedOrdering) {
         ParentCandidateScanner<String> scanner = new ParentCandidateScanner<>(
-                k, broadcaster, node, parent, nodeToChildren);
+                broadcaster, node, parent, nodeToChildren);
 
         for (int i = 0; i < expectedOrdering.size(); i++) {
             String expected = expectedOrdering.get(i);
@@ -50,14 +49,14 @@ public class ParentCandidateScannerTests {
 
     @Test
     public void testBroadcasterHasNoSuggestions() {
-        test(3, "bc", "bc", null,
+        test("bc", "bc", null,
             ImmutableMap.of("bc", Arrays.asList()),
             Arrays.asList());
     }
 
     @Test
     public void testNodeAndBroadcasterHasNoSuggestions() {
-        test(3, "bc", "a", "bc",
+        test("bc", "a", "bc",
                 ImmutableMap.of(
                         "bc", Arrays.asList("a"),
                         "a", Arrays.asList()),
@@ -66,7 +65,7 @@ public class ParentCandidateScannerTests {
 
     @Test
     public void testNodeWithSibling() {
-        test(3, "bc", "a", "bc",
+        test("bc", "a", "bc",
                 ImmutableMap.of(
                         "bc", Arrays.asList("a", "b"),
                         "a", Arrays.asList(),
@@ -76,7 +75,7 @@ public class ParentCandidateScannerTests {
 
     @Test
     public void testNodeWithNonBroadcasterParent() {
-        test(3, "bc", "a", "b",
+        test("bc", "a", "b",
                 ImmutableMap.of(
                         "bc", Arrays.asList("b"),
                         "b", Arrays.asList("a"),
@@ -86,47 +85,12 @@ public class ParentCandidateScannerTests {
 
     @Test
     public void testNodeSiblingChildBroadcaster() {
-        test(3, "bc", "a", "bc",
+        test("bc", "a", "bc",
                 ImmutableMap.of(
                         "bc", Arrays.asList("a", "b"),
                         "a", Arrays.asList("c"),
                         "b", Arrays.asList(),
                         "c", Arrays.asList()),
                 Arrays.asList("b", "c"));
-    }
-
-    @Test
-    public void testBinaryChain() {
-        test(2, "bc", "a", "c",
-                ImmutableMap.of(
-                        "bc", Arrays.asList("b"),
-                        "b", Arrays.asList("c"),
-                        "c", Arrays.asList("a"),
-                        "a", Arrays.asList()),
-                Arrays.asList("bc", "b"));
-    }
-
-    @Test
-    public void testBinaryBroadcasterSkippedFirst() {
-        test(2, "bc", "a", "d",
-                ImmutableMap.of(
-                        "bc", Arrays.asList("b", "c"),
-                        "b", Arrays.asList(),
-                        "c", Arrays.asList("d"),
-                        "d", Arrays.asList("a"),
-                        "a", Arrays.asList()),
-                Arrays.asList("b", "c", "bc"));
-    }
-
-    @Test
-    public void testBinaryWithChild() {
-        test(2, "bc", "a", "c",
-                ImmutableMap.of(
-                        "bc", Arrays.asList("b", "c"),
-                        "b", Arrays.asList(),
-                        "c", Arrays.asList("a"),
-                        "a", Arrays.asList("d"),
-                        "d", Arrays.asList()),
-                Arrays.asList("b", "bc", "d"));
     }
 }

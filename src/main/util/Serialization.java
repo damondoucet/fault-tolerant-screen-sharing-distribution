@@ -1,6 +1,7 @@
 package main.util;
 
 import com.google.common.primitives.Longs;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,10 +61,10 @@ public class Serialization {
     }
 
     public static <T> T deserialize(InputStream stream) throws IOException {
-        return null;
+        throw new NotImplementedException();
     }
 
     public static <T> byte[] serialize(T obj) {
-        return null;
+        throw new NotImplementedException();
     }
 }

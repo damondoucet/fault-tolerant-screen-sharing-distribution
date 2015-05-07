@@ -1,4 +1,4 @@
-package main.network.protocols.kary_tree;
+package main.network.protocols.tree;
 
 import main.Snapshot;
 import main.network.ClientList;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Represents a non-broadcaster node in the K-ary tree protocol.
+ * Represents a non-broadcaster node in the tree protocol.
  *
  * A node searches for a parent and stays with this parent as long as possible
  * (it only searches for a new parent on disconnect or after timing out a
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * TODO(ddoucet): this class is pretty bulky. I wonder how much of it I can
  * strip out and move to utility/helper methods/classes?
  */
-public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
+public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     private final static byte STATE_PREFIX = 0x77;
     private final static byte STATE_ACK = 0x78;  // acknowledge receipt of state
 
@@ -59,15 +59,14 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
 
     private ParentCandidateScanner<TKey> scanner;
 
-    private KaryTreeNetworkProtocol(ConnectionFactory<TKey> connectionFactory,
-                                    TKey broadcasterKey,
-                                    int k,
-                                    boolean lossy) {
+    private TreeNetworkProtocol(ConnectionFactory<TKey> connectionFactory,
+                                TKey broadcasterKey,
+                                boolean lossy) {
         super(connectionFactory, lossy);
 
         this.isBroadcaster = connectionFactory.getKey().equals(broadcasterKey);
 
-        this.topology = new Topology<>(broadcasterKey, connectionFactory.getKey(), k);
+        this.topology = new Topology<>(broadcasterKey, connectionFactory.getKey());
         this.snapshotQueue = new ConcurrentLinkedQueue<>();
         this.threadSet = new InterruptableThreadSet(
                 getThreadFuncs(isBroadcaster),
@@ -104,17 +103,15 @@ public class KaryTreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     }
 
     public static <T> NetworkProtocol losslessClient(ConnectionFactory<T> connectionFactory,
-                                                     T broadcasterKey,
-                                                     int k) {
-        return new KaryTreeNetworkProtocol<>(
-                connectionFactory, broadcasterKey, k, false);
+                                                     T broadcasterKey) {
+        return new TreeNetworkProtocol<>(
+                connectionFactory, broadcasterKey, false);
     }
 
     public static <T> NetworkProtocol lossyClient(ConnectionFactory<T> connectionFactory,
-                                                  T broadcasterKey,
-                                                  int k) {
-        return new KaryTreeNetworkProtocol<>(
-                connectionFactory, broadcasterKey, k, true);
+                                                  T broadcasterKey) {
+        return new TreeNetworkProtocol<>(
+                connectionFactory, broadcasterKey, true);
     }
 
     @Override
