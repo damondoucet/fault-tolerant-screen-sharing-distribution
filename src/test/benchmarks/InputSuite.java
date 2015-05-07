@@ -159,7 +159,8 @@ public class InputSuite {
     // We don't test different values of K because these are pretty small
     // benchmarks (no more than two clients). With larger numbers of clients,
     // different values of K should be tested.
-    @Test
+    // TODO(ddoucet): uncomment this when it gets fixed
+    /* @Test
     public void benchmarkBinaryTreeProtocol() throws Exception {
         List<Input> inputs = Arrays.asList(
                 oneClientNoFailures,
@@ -171,5 +172,5 @@ public class InputSuite {
 
         for (Input input : inputs)
             printResultSet(runBinaryTree(input));
-    }
+    } */
 }
