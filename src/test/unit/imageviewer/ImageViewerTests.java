@@ -20,7 +20,6 @@ public class ImageViewerTests {
         int testDuration = 5000;
 
         grabber.startCapture();
-        Util.sleepMillis(testDuration);
         Slideshow test = new Slideshow(buffer);
         Util.sleepMillis(testDuration);
 
