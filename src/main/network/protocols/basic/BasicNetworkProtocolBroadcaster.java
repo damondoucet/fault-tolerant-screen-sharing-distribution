@@ -64,7 +64,7 @@ public class BasicNetworkProtocolBroadcaster<TKey> extends NetworkProtocolClient
     }
 
     @Override
-    public String getParentKey() {
+    public String getParentKeyString() {
         return "HOST";
     }
 }

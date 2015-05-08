@@ -31,7 +31,7 @@ public class TreeTests {
     private void assertCorrectParent(String expectedParent, NetworkProtocol node) {
         TreeNetworkProtocol<String> castedNode =
                 (TreeNetworkProtocol<String>)node;
-        assertEquals(expectedParent, castedNode.getParentKey());
+        assertEquals(expectedParent.toString(), castedNode.getParentKeyString());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class TreeTests {
         TreeNetworkProtocol<String> c0 =
                 (TreeNetworkProtocol<String>)clients.get(0);
 
-        if (c0.getParentKey().equals(TestState.BROADCASTER_KEY))
+        if (c0.getParentKeyString().equals(TestState.BROADCASTER_KEY))
             assertCorrectParent(TestState.CLIENT_KEYS[0], clients.get(1));
         else {
             assertCorrectParent(TestState.CLIENT_KEYS[1], clients.get(0));

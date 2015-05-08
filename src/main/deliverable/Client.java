@@ -33,8 +33,8 @@ public class Client {
     }
 
     public void start() {
-        System.out.println(networkClient.getParentKey().toString());
-        slideshow = new Slideshow(slideshowInput, networkClient.getParentKey().toString());
+        System.out.println(networkClient.getParentKeyString());
+        slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
     }
 

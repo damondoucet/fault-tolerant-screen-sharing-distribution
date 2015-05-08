@@ -48,7 +48,7 @@ public class Broadcaster {
     public void start() {
         grabber.startCapture();
         queueHandler.start();
-        slideshow = new Slideshow(slideshowInput, networkBroadcaster.getParentKey().toString());
+        slideshow = new Slideshow(slideshowInput, networkBroadcaster.getParentKeyString());
         networkBroadcaster.start();
     }
 
@@ -57,11 +57,6 @@ public class Broadcaster {
         queueHandler.stop();
         slideshow.close();
         networkBroadcaster.stop();
-    }
-
-    private static SocketInformation getBroadcasterSocketInfo() {
-        // TODO(ddoucet)
-        return new SocketInformation("127.0.0.1", 5567);
     }
 
     public static void main(String[] args) throws AWTException, IOException {
@@ -74,7 +69,7 @@ public class Broadcaster {
 
         // using tree protocol
         NetworkProtocol netBroadcaster = TreeNetworkProtocol.losslessClient(
-                SocketConnectionFactory.fromSocketInfo(socketInfo), getBroadcasterSocketInfo());
+                SocketConnectionFactory.fromSocketInfo(socketInfo), socketInfo);
 
         ConcurrentLinkedQueue<Snapshot> snapshots = new ConcurrentLinkedQueue<>();
         ScreenGrabber grabber = ScreenGrabber.fromQueueFrequencyDimension(snapshots, FREQUENCY, new Dimension(600, 300));
