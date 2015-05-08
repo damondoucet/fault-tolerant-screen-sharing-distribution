@@ -221,6 +221,21 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         topology.setParent(connection.getDest());
     }
 
+    // Used for testing cycles
+    public void setParent(TKey parent) {
+        // TODO(ddoucet): still not sure this is right. can break assumption
+        // in readFromParent about them being the only thread to set parent
+        // to non-null value
+        try {
+            Connection<TKey> connection = connectionFactory.openConnection(parent);
+            Connection<TKey> oldConnection = parentConnection.getAndSet(connection);
+            oldConnection.close();
+            topology.setParent(connection.getDest());
+        } catch (Exception e) {
+            closeParent();
+        }
+    }
+
     private void readFromParent() {
         TKey parentKey = getParentKey();
         try {

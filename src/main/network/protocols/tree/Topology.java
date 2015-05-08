@@ -79,7 +79,7 @@ public class Topology<TKey> {
     }
 
     // Should only be called while this is locked.
-    private void computeNodeToChildrenMapLocked() {
+    private void computeNodeToChildrenMapLocked() throws Exception {
         nodeToChildren.clear();
 
         for (Map.Entry<TKey, Map<TKey, TKey>> edgeMap : destToNodeToParent.entrySet()) {
@@ -96,20 +96,41 @@ public class Topology<TKey> {
                 nodeToChildren.get(parent).add(node);
             }
         }
+        // Adding in cycle check
+        checkForCycles();
+    }
+
+    private void checkForCycles() throws Exception {
+        checkForCycles(broadcasterKey, new HashSet<>());
+    }
+
+    private void checkForCycles(TKey node, Set<TKey> visited) throws Exception {
+        if (visited.contains(node)) {
+            System.out.println("cycle!");
+            throw new Exception("Cycle detected in topology");
+        }
+
+        if (nodeToChildren.get(node) == null)
+            return;
+
+        visited.add(node);
+        for (TKey child : nodeToChildren.get(node))
+            checkForCycles(child, visited);
+        visited.remove(node);
     }
 
     public synchronized void updateChildInfo(TKey child, InputStream stream)
-            throws IOException {
+            throws Exception {
         updateEdgeLocked(child, stream);
     }
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
-            throws IOException {
+            throws Exception {
         updateEdgeLocked(parentKey, stream);
     }
 
     // Should only be called while this is locked.
-    private void updateEdgeLocked(TKey edge, InputStream stream) throws IOException {
+    private void updateEdgeLocked(TKey edge, InputStream stream) throws IOException, Exception {
         Map<TKey, TKey> nodeToParent = new HashMap<>();
 
         long numNodes = Serialization.readLong(stream);
