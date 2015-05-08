@@ -2,6 +2,8 @@ package main.imageviewer;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -75,7 +77,7 @@ public class DrawingFrame extends JFrame {
         createCanvas();
         this.width = width;
         this.height = height;
-        finishGUI(width, height );
+        finishGUI(width, height);
     }
 
     /**
@@ -88,6 +90,22 @@ public class DrawingFrame extends JFrame {
                 draw(g);
             }
         };
+        canvas.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                setWidth(e.getComponent().getWidth());
+                setHeight(e.getComponent().getHeight());
+
+            }
+        });
+    }
+
+    private void setWidth(int width) {
+        this.width = width;
+    }
+
+    private void setHeight(int height) {
+        this.height = height;
     }
 
     /**
