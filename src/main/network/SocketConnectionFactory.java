@@ -3,6 +3,8 @@ package main.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory for creating socket-based Connections.
@@ -12,12 +14,14 @@ import java.net.Socket;
 public class SocketConnectionFactory implements ConnectionFactory<SocketInformation> {
     private final SocketInformation info;
     private final ServerSocket serverSocket;
+    private ConcurrentHashMap<SocketInformation, SocketConnection> connections;
 
     // Avoid throwing exceptions in constructors
     private SocketConnectionFactory(SocketInformation info,
                                    ServerSocket serverSocket) {
         this.info = info;
         this.serverSocket = serverSocket;
+        this.connections = new ConcurrentHashMap<>();
     }
 
     public static SocketConnectionFactory fromSocketInfo(SocketInformation info)
@@ -41,17 +45,22 @@ public class SocketConnectionFactory implements ConnectionFactory<SocketInformat
         SocketInformation dest = new SocketInformation(
                 socket.getInetAddress().getHostAddress(),
                 socket.getPort());
-
-        return SocketConnection.fromSocket(socket, info, dest);
+        this.connections.put(dest, SocketConnection.fromSocket(socket, info, dest));
+        return this.connections.get(dest);
     }
 
     @Override
     public Connection<SocketInformation> openConnection(SocketInformation dest)
             throws IOException {
-        return SocketConnection.fromSocket(
+        this.connections.put(dest, SocketConnection.fromSocket(
                 new Socket(dest.ip, dest.port),
                 info,
-                dest);
+                dest));
+        return this.connections.get(dest);
+    }
+
+    public void kill(SocketInformation dest) {
+        this.connections.remove(dest);
     }
 
     @Override

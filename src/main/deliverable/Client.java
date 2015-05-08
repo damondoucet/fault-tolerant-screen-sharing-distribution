@@ -6,9 +6,12 @@ import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;
 import main.network.protocols.NetworkProtocol;
 import main.network.protocols.basic.BasicNetworkProtocolClient;
+import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.Util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -53,12 +56,40 @@ public class Client {
     public static void main(String[] args) throws IOException {
         SocketInformation broadcasterSocketInfo = getBroadcasterSocketInfo();
 
-        NetworkProtocol networkClient = BasicNetworkProtocolClient.lossyClient(
-                SocketConnectionFactory.fromSocketInfo(getSocketInfo()),
-                broadcasterSocketInfo);
+        SocketConnectionFactory socketConnectionFactory = SocketConnectionFactory.fromSocketInfo(getSocketInfo());
+
+        // using basic protocol
+//        NetworkProtocol networkClient = BasicNetworkProtocolClient.lossyClient(
+//                socketConnectionFactory,
+//                broadcasterSocketInfo);
+
+        // using tree protocol
+        NetworkProtocol networkClient = TreeNetworkProtocol.losslessClient(
+                socketConnectionFactory, getBroadcasterSocketInfo());
 
         Client client = new Client(networkClient);
         client.start();
+
         Runtime.getRuntime().addShutdownHook(new Thread(client::stop));
+
+        try{
+            BufferedReader br =
+                    new BufferedReader(new InputStreamReader(System.in));
+
+            String input;
+
+            while((input=br.readLine())!=null){
+                // looking for e.g. "kill 127.0.0.1:5567"
+                if (input.startsWith("kill")){
+                    String socketInfo = input.substring(("kill ").length());
+                    String[] parts = socketInfo.split(":");
+                    socketConnectionFactory.kill(new SocketInformation(parts[0], Integer.parseInt(parts[1])));
+                }
+            }
+
+        }catch(IOException io){
+            io.printStackTrace();
+        }
+
     }
 }
