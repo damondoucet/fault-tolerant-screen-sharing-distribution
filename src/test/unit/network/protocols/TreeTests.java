@@ -159,11 +159,8 @@ public class TreeTests {
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(2));
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(3));
 
-            TreeNetworkProtocol<String> zeroP = (TreeNetworkProtocol<String>) state.clients.get(0);
-            TreeNetworkProtocol<String> oneP = (TreeNetworkProtocol<String>) state.clients.get(1);
             TreeNetworkProtocol<String> twoP = (TreeNetworkProtocol<String>) state.clients.get(2);
-            TreeNetworkProtocol<String> threeP = (TreeNetworkProtocol<String>) state.clients.get(3);
-//            twoP.setParent(oneP);
+            twoP.setParent(TestState.CLIENT_KEYS[1]);
             state.broadcaster.insertSnapshot(state.snapshots[0]);
             state.broadcaster.insertSnapshot(state.snapshots[1]);
             Util.sleepMillis(2 * CLIENT_DELAY_MILLIS);

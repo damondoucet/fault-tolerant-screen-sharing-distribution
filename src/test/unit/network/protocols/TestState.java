@@ -23,7 +23,7 @@ public class TestState {
     public final static int THREAD_DELAY_MILLIS = 100;
 
     public final static String BROADCASTER_KEY = "broadcaster";
-    public final static String[] CLIENT_KEYS = {"client0", "client1"};
+    public final static String[] CLIENT_KEYS = {"client0", "client1", "client2", "client3"};
 
     public final Snapshot[] snapshots;
 

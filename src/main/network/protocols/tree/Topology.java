@@ -100,31 +100,32 @@ public class Topology<TKey> {
         checkForCycles();
     }
 
-    public void checkForCycles() throws Exception {
-        final ArrayDeque<TKey> stack =  new ArrayDeque<>();
-        List<TKey> discovered = new ArrayList<>();
-        stack.push(this.broadcasterKey);
-        while (!(stack.isEmpty())) {
-            TKey curNode = stack.poll();
-            if (!discovered.contains(curNode)) {
-                discovered.add(curNode);
-                for (TKey child : nodeToChildren.get(curNode)) {
-                    stack.addFirst(child);
-                }
-            } else {
-                throw new Exception("We have a cycle");
-            }
+    private void checkForCycles() throws Exception {
+        checkForCycles(broadcasterKey, new HashSet<>());
+    }
+
+    private void checkForCycles(TKey node, Set<TKey> visited) throws Exception {
+        if (visited.contains(node)) {
+            System.out.println("cycle!");
+            throw new Exception("Cycle detected in topology");
         }
+
+        if (nodeToChildren.get(node) == null)
+            return;
+
+        visited.add(node);
+        for (TKey child : nodeToChildren.get(node))
+            checkForCycles(child, visited);
+        visited.remove(node);
     }
 
     public synchronized void updateChildInfo(TKey child, InputStream stream)
-            throws IOException, Exception {
+            throws Exception {
         updateEdgeLocked(child, stream);
     }
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
-            throws IOException, Exception {
-        // System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
+            throws Exception {
         updateEdgeLocked(parentKey, stream);
     }
 
