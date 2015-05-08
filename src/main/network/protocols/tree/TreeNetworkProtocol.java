@@ -204,11 +204,15 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         TKey parent = scanner.findNewParent();
         if (parent == null) {
             disconnect();
+            Util.sleepMillis(500);
+
             scanner.disconnect();
             parent = scanner.findNewParent();
 
-            if (parent == null)
-                throw new Exception("Unable to find parent to connect to");
+            if (parent == null) {
+                Util.sleepMillis(500);
+                scanner = topology.createParentCandidateScanner();
+            }
         }
 
         Connection<TKey> connection = connectionFactory.openConnection(parent);
@@ -217,6 +221,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     }
 
     private void readFromParent() {
+        TKey parentKey = getParentKey();
         try {
             // Normally, this would be unsafe, but we're the only thread that
             // would set parentConnection to a non-null value so it's safe in
@@ -243,10 +248,9 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                         prefix,
                         connection.getDest());
         } catch (Exception e) {
-            System.out.println(connectionFactory.getKey() + " closing connection to parent");
             closeParent();
             System.out.printf("%s error reading from parent %s\n",
-                    connectionFactory.getKey(), getParentKey());
+                    connectionFactory.getKey(), parentKey);
         }
     }
 

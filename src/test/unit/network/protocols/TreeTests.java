@@ -14,7 +14,7 @@ import java.util.function.Consumer;
  * Tests for the KaryTreeNetworkProtocol using TestConnections.
  */
 public class TreeTests {
-    private final static int CONNECTION_DELAY_MILLIS = 200;
+    private final static int CONNECTION_DELAY_MILLIS = 1500;
 
     // How long until a client should have received the snapshot.
     private final static int CLIENT_DELAY_MILLIS = 1500;
@@ -98,7 +98,7 @@ public class TreeTests {
             // Now insert failure and wait for reconnection, then insert the
             // next snapshot.
             state.manager.setRateLimit(TestState.BROADCASTER_KEY, TestState.CLIENT_KEYS[0], 0);
-            Util.sleepMillis(CONNECTION_DELAY_MILLIS * 5);
+            Util.sleepMillis(CONNECTION_DELAY_MILLIS);
             checkUnary(state.clients);
 
             state.broadcaster.insertSnapshot(state.snapshots[1]);
