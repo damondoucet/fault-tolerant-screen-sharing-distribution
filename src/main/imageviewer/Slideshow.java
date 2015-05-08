@@ -39,7 +39,7 @@ public class Slideshow extends DrawingFrame {
         queueHandler.stop();
     }
 
-    public void setParentIP(String ipAddr) {
-        super.setParentIP(ipAddr);
+    public void setParentAddress(String ipAddr) {
+        super.setParentAddress(ipAddr);
     }
 }

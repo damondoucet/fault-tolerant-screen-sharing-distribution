@@ -11,14 +11,16 @@ import java.io.File;
  * A simple JFrame containing a single component for drawing in (via the draw method)
  * Allows setting of a default image to be drawn if the draw method is not overridden.
  *
- * @author Chris Bailey-Kellogg, Dartmouth CS 10, Winter 2014
+ * Adapted from Chris Bailey-Kellogg, Dartmouth CS 10, Winter 2014
  */
 public class DrawingFrame extends JFrame {
+    private static Font font = new Font("Arial", Font.BOLD, 24);
+
     public JComponent canvas;						// handles graphics display
     public BufferedImage image;						// what to draw by default
     public int width;
     public int height;
-    public String parentIP;
+    public String parentAddress;
 
     /**
      * Just the shell -- need to call finishGUI once the size is known.
@@ -61,7 +63,7 @@ public class DrawingFrame extends JFrame {
         super(title);
         this.width = width;
         this.height = height;
-        this.parentIP = parentIP;
+        this.parentAddress = parentIP;
         createCanvas();
         finishGUI(width, height);
         setImage(image);
@@ -98,7 +100,6 @@ public class DrawingFrame extends JFrame {
             public void componentResized(ComponentEvent e) {
                 setWidth(e.getComponent().getWidth());
                 setHeight(e.getComponent().getHeight());
-
             }
         });
     }
@@ -111,8 +112,8 @@ public class DrawingFrame extends JFrame {
         this.height = height;
     }
 
-    protected void setParentIP(String ip) {
-        this.parentIP = ip;
+    protected void setParentAddress(String ip) {
+        this.parentAddress = ip;
     }
 
     /**
@@ -139,11 +140,10 @@ public class DrawingFrame extends JFrame {
     public void draw(Graphics g) {
         if (image != null) {
             g.drawImage(image, 0, 0, width, height, null);
-            Font font = new Font("Arial", Font.BOLD, 24);
             g.setFont(font);
-            g.drawString(this.parentIP, width - 170, height - 20);
+            int messageWidth = g.getFontMetrics().stringWidth(this.parentAddress);
+            g.drawString(this.parentAddress, width - messageWidth - 20, height - 20);
             canvas.setForeground(Color.RED);
-
         }
     }
 

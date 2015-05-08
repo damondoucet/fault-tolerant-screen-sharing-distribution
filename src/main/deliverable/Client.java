@@ -5,13 +5,10 @@ import main.imageviewer.Slideshow;
 import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;
 import main.network.protocols.NetworkProtocol;
-import main.network.protocols.basic.BasicNetworkProtocolClient;
 import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.Util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.SocketException;
 import java.util.Random;
 import java.util.Scanner;
@@ -50,7 +47,7 @@ public class Client {
         (new Thread(((Runnable) () -> {
             while (true) {
                 Util.sleepMillis(3000);
-                slideshow.setParentIP(networkClient.getParentKeyString());
+                slideshow.setParentAddress(networkClient.getParentKeyString());
             }
         }))).start();
     }
