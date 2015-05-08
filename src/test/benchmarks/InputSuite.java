@@ -118,7 +118,9 @@ public class InputSuite {
                 input).run();
     }
 
-    private ResultSet<String> runKaryTree(int k, Input input) throws Exception {
+    private ResultSet<String> runTree(Input input) throws Exception {
+        System.out.println(input.name);
+        System.out.println("===============");
         TestConnectionManager manager = new TestConnectionManager();
         ProtocolFactory factory = new ProtocolFactory(Input.BROADCASTER);
         return new Runner(
@@ -126,10 +128,6 @@ public class InputSuite {
                 key -> factory.createTreeClient(manager, key),
                 manager,
                 input).run();
-    }
-
-    private ResultSet<String> runBinaryTree(Input input) throws Exception {
-        return runKaryTree(2, input);
     }
 
     @Test
@@ -142,9 +140,8 @@ public class InputSuite {
     // We don't test different values of K because these are pretty small
     // benchmarks (no more than two clients). With larger numbers of clients,
     // different values of K should be tested.
-    // TODO(ddoucet): uncomment this when it gets fixed
-    /* @Test
-    public void benchmarkBinaryTreeProtocol() throws Exception {
+    @Test
+    public void benchmarkTreeProtocol() throws Exception {
         List<Input> inputs = Arrays.asList(
                 oneClientNoFailures,
                 oneClientSlowNetwork,
@@ -154,6 +151,6 @@ public class InputSuite {
                 chain);
 
         for (Input input : inputs)
-            printResultSet(runBinaryTree(input));
-    } */
+            printResultSet(runTree(input));
+    }
 }

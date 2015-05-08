@@ -46,7 +46,6 @@ public class Runner {
     }
 
     private void initialize() throws Exception {
-        schedule.initialize(input.clients);
         broadcaster = createBroadcaster.call();
         broadcaster.start();
         currentSnapshot = Snapshot.lossySnapshot(0, image);
@@ -57,6 +56,8 @@ public class Runner {
             clients.get(i).start();
             new Thread(new ClientWatcher(i)).start();
         }
+
+        schedule.initialize(input.clients);
     }
 
     private class ClientWatcher implements Runnable {
@@ -118,8 +119,10 @@ public class Runner {
 
     public ResultSet<String> run() throws Exception {
         initialize();
+        Util.sleepMillis(3000);
         for (int i = 0; i < input.numRounds; i++) {
             schedule.applyForRound(i);
+            Util.sleepMillis(3000);
             run(i);
         }
 

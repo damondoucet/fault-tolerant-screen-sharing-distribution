@@ -42,7 +42,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     // How long to wait between sending states to the parent in ns.
     private final static long NANO_SEND_STATE_DELAY = 100000000;  // 100ms
 
-    private final static long TIMEOUT_MILLIS = 1000;
+    private final static long TIMEOUT_MILLIS = 3500;
 
     private final boolean isBroadcaster;
     private final Topology<TKey> topology;
@@ -135,7 +135,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
 
     private void handleChild(Connection<TKey> child) {
         try {
-            // TODO(ddoucet): automatically send current state of world
+            Util.threadsafeWrite(child, topology.serializeExceptChild(STATE_PREFIX, child.getDest()));
 
             InputStream stream = child.getInputStream();
             AtomicBoolean shouldExecute = threadSet.getShouldExecute();
@@ -215,6 +215,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
             }
         }
 
+        System.out.println(connectionFactory.getKey() + " attempting to connect to " + parent);
         Connection<TKey> connection = connectionFactory.openConnection(parent);
         parentConnection.set(connection);
         topology.setParent(connection.getDest());
