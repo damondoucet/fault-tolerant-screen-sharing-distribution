@@ -168,9 +168,9 @@ public class TreeTests {
             oneP.setParent(TestState.CLIENT_KEYS[3]);
             threeP.setParent(TestState.CLIENT_KEYS[2]);
 
-            System.out.println(twoP.getParentKey());
-            System.out.println(oneP.getParentKey());
-            System.out.println(threeP.getParentKey());
+            System.out.println(twoP.getParentKeyString());
+            System.out.println(oneP.getParentKeyString());
+            System.out.println(threeP.getParentKeyString());
 
             state.broadcaster.insertSnapshot(state.snapshots[0]);
             state.broadcaster.insertSnapshot(state.snapshots[1]);

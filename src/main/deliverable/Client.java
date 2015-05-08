@@ -36,6 +36,14 @@ public class Client {
         System.out.println(networkClient.getParentKeyString());
         slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
+        new Runnable() {
+
+            @Override
+            public void run() {
+                Util.sleepMillis(1000);
+                slideshow.setParentIP(networkClient.getParentKeyString());
+            }
+        }.run();
     }
 
     public void stop() {
