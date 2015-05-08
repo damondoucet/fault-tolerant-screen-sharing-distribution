@@ -159,15 +159,26 @@ public class TreeTests {
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(2));
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(3));
 
+            TreeNetworkProtocol<String> oneP = (TreeNetworkProtocol<String>) state.clients.get(1);
             TreeNetworkProtocol<String> twoP = (TreeNetworkProtocol<String>) state.clients.get(2);
+            TreeNetworkProtocol<String> threeP = (TreeNetworkProtocol<String>) state.clients.get(3);
+
+            // Force a cycle
             twoP.setParent(TestState.CLIENT_KEYS[1]);
+            oneP.setParent(TestState.CLIENT_KEYS[3]);
+            threeP.setParent(TestState.CLIENT_KEYS[2]);
+
+            System.out.println(twoP.getParentKey());
+            System.out.println(oneP.getParentKey());
+            System.out.println(threeP.getParentKey());
+
             state.broadcaster.insertSnapshot(state.snapshots[0]);
             state.broadcaster.insertSnapshot(state.snapshots[1]);
             Util.sleepMillis(2 * CLIENT_DELAY_MILLIS);
 
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(0).poll());
-            assertEquals(state.snapshots[1], state.clientOutputQueues.get(0).poll());
-            assertTrue(state.clientOutputQueues.get(0).isEmpty());
+            assertEquals(state.snapshots[0], state.clientOutputQueues.get(2).poll());
+            assertEquals(state.snapshots[1], state.clientOutputQueues.get(2).poll());
+            assertTrue(state.clientOutputQueues.get(2).isEmpty());
         });
     }
 }

@@ -232,6 +232,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
             oldConnection.close();
             topology.setParent(connection.getDest());
         } catch (Exception e) {
+            System.out.println("Set parent failed: " + e.toString());
             closeParent();
         }
     }
