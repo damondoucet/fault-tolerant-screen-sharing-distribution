@@ -91,11 +91,17 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     }
 
     // Used for testing
-    public TKey getParentKey() {
+    @Override
+    public String getParentKeyString() {
+        if (isBroadcaster)
+            return "HOST";
+        if (parentConnection == null){
+            return "";
+        }
         Connection<TKey> connection = parentConnection.get();
         if (connection == null)
-            return null;
-        return connection.getDest();
+            return "";
+        return connection.getDest().toString();
     }
 
     public static <T> NetworkProtocol losslessClient(ConnectionFactory<T> connectionFactory,
@@ -193,7 +199,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         } catch (Exception e) {
             closeParent();
             System.out.printf("%s error sending state to parent %s\n",
-                    connectionFactory.getKey(), getParentKey());
+                    connectionFactory.getKey(), getParentKeyString());
         }
     }
 
@@ -232,12 +238,13 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
             oldConnection.close();
             topology.setParent(connection.getDest());
         } catch (Exception e) {
+            System.out.println("Set parent failed: " + e.toString());
             closeParent();
         }
     }
 
     private void readFromParent() {
-        TKey parentKey = getParentKey();
+        String parentKey = getParentKeyString();
         try {
             // Normally, this would be unsafe, but we're the only thread that
             // would set parentConnection to a non-null value so it's safe in

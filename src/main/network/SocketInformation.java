@@ -35,9 +35,6 @@ public class SocketInformation {
 
     @Override
     public String toString() {
-        return "SocketInformation{" +
-                "ip='" + ip + '\'' +
-                ", port=" + port +
-                '}';
+        return ip + ":" + port;
     }
 }

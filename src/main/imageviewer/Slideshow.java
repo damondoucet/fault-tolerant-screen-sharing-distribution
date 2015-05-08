@@ -16,8 +16,8 @@ public class Slideshow extends DrawingFrame {
         return new BufferedImage(600, 300, BufferedImage.TYPE_INT_ARGB);
     }
 
-    public Slideshow(ConcurrentLinkedQueue<Snapshot> images) {
-        super("Slideshow", getStartingImage(), 600, 300);
+    public Slideshow(ConcurrentLinkedQueue<Snapshot> images, String source) {
+        super("Slideshow", getStartingImage(), 600, 300, source);
         ConcurrentLinkedQueue<Snapshot> slides = images;
 
         queueHandler = new QueueHandler<>(
@@ -37,5 +37,9 @@ public class Slideshow extends DrawingFrame {
 
     public void close() {
         queueHandler.stop();
+    }
+
+    public void setParentIP(String ipAddr) {
+        super.setParentIP(ipAddr);
     }
 }

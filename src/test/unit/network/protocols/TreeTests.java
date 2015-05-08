@@ -31,7 +31,7 @@ public class TreeTests {
     private void assertCorrectParent(String expectedParent, NetworkProtocol node) {
         TreeNetworkProtocol<String> castedNode =
                 (TreeNetworkProtocol<String>)node;
-        assertEquals(expectedParent, castedNode.getParentKey());
+        assertEquals(expectedParent.toString(), castedNode.getParentKeyString());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class TreeTests {
         TreeNetworkProtocol<String> c0 =
                 (TreeNetworkProtocol<String>)clients.get(0);
 
-        if (c0.getParentKey().equals(TestState.BROADCASTER_KEY))
+        if (c0.getParentKeyString().equals(TestState.BROADCASTER_KEY))
             assertCorrectParent(TestState.CLIENT_KEYS[0], clients.get(1));
         else {
             assertCorrectParent(TestState.CLIENT_KEYS[1], clients.get(0));
@@ -159,15 +159,26 @@ public class TreeTests {
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(2));
             assertCorrectParent(TestState.BROADCASTER_KEY, state.clients.get(3));
 
+            TreeNetworkProtocol<String> oneP = (TreeNetworkProtocol<String>) state.clients.get(1);
             TreeNetworkProtocol<String> twoP = (TreeNetworkProtocol<String>) state.clients.get(2);
+            TreeNetworkProtocol<String> threeP = (TreeNetworkProtocol<String>) state.clients.get(3);
+
+            // Force a cycle
             twoP.setParent(TestState.CLIENT_KEYS[1]);
+            oneP.setParent(TestState.CLIENT_KEYS[3]);
+            threeP.setParent(TestState.CLIENT_KEYS[2]);
+
+            System.out.println(twoP.getParentKeyString());
+            System.out.println(oneP.getParentKeyString());
+            System.out.println(threeP.getParentKeyString());
+
             state.broadcaster.insertSnapshot(state.snapshots[0]);
             state.broadcaster.insertSnapshot(state.snapshots[1]);
             Util.sleepMillis(2 * CLIENT_DELAY_MILLIS);
 
-            assertEquals(state.snapshots[0], state.clientOutputQueues.get(0).poll());
-            assertEquals(state.snapshots[1], state.clientOutputQueues.get(0).poll());
-            assertTrue(state.clientOutputQueues.get(0).isEmpty());
+            assertEquals(state.snapshots[0], state.clientOutputQueues.get(2).poll());
+            assertEquals(state.snapshots[1], state.clientOutputQueues.get(2).poll());
+            assertTrue(state.clientOutputQueues.get(2).isEmpty());
         });
     }
 }

@@ -7,6 +7,7 @@ import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;
 import main.network.protocols.NetworkProtocol;
 import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
+import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.QueueHandler;
 import main.util.Util;
 
@@ -40,14 +41,20 @@ public class Broadcaster {
                 grabberOutput,
                 (snapshot) -> {
                     slideshowInput.add(snapshot);
-                    networkBroadcaster.insertSnapshot(snapshot);
+                    if (grabberOutput.size() > 10) {
+                        grabberOutput.poll();
+                        networkBroadcaster.insertSnapshot(snapshot);
+                    } else {
+                        networkBroadcaster.insertSnapshot(snapshot);
+                    }
+
                 });
     }
 
     public void start() {
         grabber.startCapture();
         queueHandler.start();
-        slideshow = new Slideshow(slideshowInput);
+        slideshow = new Slideshow(slideshowInput, networkBroadcaster.getParentKeyString());
         networkBroadcaster.start();
     }
 
@@ -62,14 +69,20 @@ public class Broadcaster {
         SocketInformation socketInfo = new SocketInformation(Util.getIP(LOCAL_MACHINE_ONLY), PORT);
         System.out.println(socketInfo);
 
-        NetworkProtocol netBroadcaster = new BasicNetworkProtocolBroadcaster<>(
-                SocketConnectionFactory.fromSocketInfo(socketInfo));
+        // using basic protocol
+//        NetworkProtocol netBroadcaster = new BasicNetworkProtocolBroadcaster<>(
+//                SocketConnectionFactory.fromSocketInfo(socketInfo));
+
+        // using tree protocol
+        NetworkProtocol netBroadcaster = TreeNetworkProtocol.losslessClient(
+                SocketConnectionFactory.fromSocketInfo(socketInfo), socketInfo);
 
         ConcurrentLinkedQueue<Snapshot> snapshots = new ConcurrentLinkedQueue<>();
         ScreenGrabber grabber = ScreenGrabber.fromQueueFrequencyDimension(snapshots, FREQUENCY, new Dimension(600, 300));
         Broadcaster broadcaster = new Broadcaster(grabber, snapshots, netBroadcaster);
 
         broadcaster.start();
+
         Runtime.getRuntime().addShutdownHook(new Thread(broadcaster::stop));
     }
 }
