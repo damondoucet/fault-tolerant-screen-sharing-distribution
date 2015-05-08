@@ -18,6 +18,7 @@ public class DrawingFrame extends JFrame {
     public BufferedImage image;						// what to draw by default
     public int width;
     public int height;
+    public String parentIP;
 
     /**
      * Just the shell -- need to call finishGUI once the size is known.
@@ -56,10 +57,11 @@ public class DrawingFrame extends JFrame {
      * @param title		displayed in window title bar
      * @param image
      */
-    public DrawingFrame(String title, BufferedImage image, int width, int height) {
+    public DrawingFrame(String title, BufferedImage image, int width, int height, String parentIP) {
         super(title);
         this.width = width;
         this.height = height;
+        this.parentIP = parentIP;
         createCanvas();
         finishGUI(width, height);
         setImage(image);
@@ -84,6 +86,7 @@ public class DrawingFrame extends JFrame {
      * Creates our graphics-handling component.
      */
     protected void createCanvas() {
+        System.out.println("Calling create canvas");
         canvas = new JComponent() {
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -108,6 +111,10 @@ public class DrawingFrame extends JFrame {
         this.height = height;
     }
 
+    protected void setParentIP(String ip) {
+        this.parentIP = ip;
+    }
+
     /**
      * Boilerplate to finish initializing the GUI to the specified size.
      *
@@ -130,7 +137,14 @@ public class DrawingFrame extends JFrame {
      * @param g
      */
     public void draw(Graphics g) {
-        if (image != null) g.drawImage(image, 0, 0, width, height, null);
+        if (image != null) {
+            g.drawImage(image, 0, 0, width, height, null);
+            Font font = new Font("Arial", Font.BOLD, 24);
+            g.setFont(font);
+            g.drawString(this.parentIP, width - 170, height - 20);
+            canvas.setForeground(Color.RED);
+
+        }
     }
 
     /**

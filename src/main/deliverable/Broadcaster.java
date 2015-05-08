@@ -47,7 +47,7 @@ public class Broadcaster {
     public void start() {
         grabber.startCapture();
         queueHandler.start();
-        slideshow = new Slideshow(slideshowInput);
+        slideshow = new Slideshow(slideshowInput, networkBroadcaster.getParentKey().toString());
         networkBroadcaster.start();
     }
 

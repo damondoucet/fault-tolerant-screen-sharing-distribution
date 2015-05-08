@@ -91,6 +91,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     }
 
     // Used for testing
+    @Override
     public TKey getParentKey() {
         Connection<TKey> connection = parentConnection.get();
         if (connection == null)

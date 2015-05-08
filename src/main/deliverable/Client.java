@@ -30,7 +30,8 @@ public class Client {
     }
 
     public void start() {
-        slideshow = new Slideshow(slideshowInput);
+        System.out.println(networkClient.getParentKey().toString());
+        slideshow = new Slideshow(slideshowInput, networkClient.getParentKey().toString());
         networkClient.start();
     }
 

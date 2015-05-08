@@ -84,4 +84,8 @@ public class BasicNetworkProtocolClient<TKey> extends NetworkProtocolClient<TKey
             Util.printException("Error receiving Snapshots", e);
         }
     }
+    @Override
+    public TKey getParentKey() {
+        return broadcasterKey;
+    }
 }

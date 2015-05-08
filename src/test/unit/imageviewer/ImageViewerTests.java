@@ -20,7 +20,7 @@ public class ImageViewerTests {
         int testDuration = 5000;
 
         grabber.startCapture();
-        Slideshow test = new Slideshow(buffer);
+        Slideshow test = new Slideshow(buffer, "127.0.0.1");
         Util.sleepMillis(testDuration);
 
         grabber.endCapture();

@@ -34,4 +34,9 @@ public interface NetworkProtocol {
      * Kill the threads spawned via start().
      */
     public void stop();
+
+    /**
+     * Get the address of our current parent.
+     */
+    public Object getParentKey();
 }

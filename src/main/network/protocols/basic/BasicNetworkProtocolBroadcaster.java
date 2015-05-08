@@ -1,5 +1,6 @@
 package main.network.protocols.basic;
 
+import main.network.Connection;
 import main.network.protocols.NetworkProtocolClient;
 import main.util.InterruptableThreadSet;
 import main.Snapshot;
@@ -60,5 +61,10 @@ public class BasicNetworkProtocolBroadcaster<TKey> extends NetworkProtocolClient
             onSnapshot(snapshot);
             clientList.sendSnapshot(snapshot);
         }
+    }
+
+    @Override
+    public String getParentKey() {
+        return "HOST";
     }
 }
