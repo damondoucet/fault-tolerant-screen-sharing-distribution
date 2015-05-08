@@ -38,5 +38,5 @@ public interface NetworkProtocol {
     /**
      * Get the address of our current parent.
      */
-    public Object getParentKey();
+    public String getParentKeyString();
 }
