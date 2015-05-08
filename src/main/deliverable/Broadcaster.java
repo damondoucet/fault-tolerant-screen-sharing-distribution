@@ -41,7 +41,13 @@ public class Broadcaster {
                 grabberOutput,
                 (snapshot) -> {
                     slideshowInput.add(snapshot);
-                    networkBroadcaster.insertSnapshot(snapshot);
+                    if (grabberOutput.size() > 10) {
+                        grabberOutput.poll();
+                        networkBroadcaster.insertSnapshot(snapshot);
+                    } else {
+                        networkBroadcaster.insertSnapshot(snapshot);
+                    }
+
                 });
     }
 
