@@ -79,7 +79,7 @@ public class Topology<TKey> {
     }
 
     // Should only be called while this is locked.
-    private void computeNodeToChildrenMapLocked() {
+    private void computeNodeToChildrenMapLocked() throws Exception {
         nodeToChildren.clear();
 
         for (Map.Entry<TKey, Map<TKey, TKey>> edgeMap : destToNodeToParent.entrySet()) {
@@ -96,20 +96,40 @@ public class Topology<TKey> {
                 nodeToChildren.get(parent).add(node);
             }
         }
+        // Adding in cycle check
+        checkForCycles();
+    }
+
+    public void checkForCycles() throws Exception {
+        final ArrayDeque<TKey> stack =  new ArrayDeque<>();
+        List<TKey> discovered = new ArrayList<>();
+        stack.push(this.broadcasterKey);
+        while (!(stack.isEmpty())) {
+            TKey curNode = stack.poll();
+            if (!discovered.contains(curNode)) {
+                discovered.add(curNode);
+                for (TKey child : nodeToChildren.get(curNode)) {
+                    stack.addFirst(child);
+                }
+            } else {
+                throw new Exception("We have a cycle");
+            }
+        }
     }
 
     public synchronized void updateChildInfo(TKey child, InputStream stream)
-            throws IOException {
+            throws IOException, Exception {
         updateEdgeLocked(child, stream);
     }
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
-            throws IOException {
+            throws IOException, Exception {
+        // System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
         updateEdgeLocked(parentKey, stream);
     }
 
     // Should only be called while this is locked.
-    private void updateEdgeLocked(TKey edge, InputStream stream) throws IOException {
+    private void updateEdgeLocked(TKey edge, InputStream stream) throws IOException, Exception {
         Map<TKey, TKey> nodeToParent = new HashMap<>();
 
         long numNodes = Serialization.readLong(stream);

@@ -220,6 +220,14 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
         topology.setParent(connection.getDest());
     }
 
+    // Used for testing cycles
+    public void setParent(TKey parent) throws Exception{
+        closeParent();
+        Connection<TKey> connection = connectionFactory.openConnection(parent);
+        parentConnection.set(connection);
+        topology.setParent(connection.getDest());
+    }
+
     private void readFromParent() {
         TKey parentKey = getParentKey();
         try {
