@@ -64,9 +64,16 @@ public class Util {
     public static <T> T doWithTimeout(Callable<T> callable, long timeoutMillis)
             throws InterruptedException, ExecutionException, TimeoutException {
         // http://stackoverflow.com/questions/804951/is-it-possible-to-read-from-a-inputstream-with-a-timeout
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        Future<T> future = executor.submit(callable);
-        return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        ExecutorService executor = null;
+        try {
+            executor = Executors.newFixedThreadPool(2);
+            Future<T> future = executor.submit(callable);
+            return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
+        } finally {
+            // Clean up thread resources
+            if (executor != null)
+                executor.shutdownNow();
+        }
     }
 
     public static <T> void threadsafeWrite(Connection<T> connection, byte[] bytes)
