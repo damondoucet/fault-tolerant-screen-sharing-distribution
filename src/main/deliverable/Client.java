@@ -47,10 +47,12 @@ public class Client {
         System.out.println(networkClient.getParentKeyString());
         slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
-        ((Runnable) () -> {
-            Util.sleepMillis(1000);
-            slideshow.setParentIP(networkClient.getParentKeyString());
-        }).run();
+        (new Thread(((Runnable) () -> {
+            while (true) {
+                Util.sleepMillis(3000);
+                slideshow.setParentIP(networkClient.getParentKeyString());
+            }
+        }))).start();
     }
 
     public void stop() {
@@ -99,15 +101,16 @@ public class Client {
 
         while ((input=scanner.nextLine())!=null) {
             // looking for e.g. "kill 127.0.0.1:5567"
-            if (input.startsWith("kill")){
-                try {
+            try {
+                if (input.startsWith("kill")) {
+                    System.out.println(networkClient.getParentKeyString());
                     String dInfo = input.substring(("kill ").length());
                     String[] dParts = parseKeyString(dInfo);
                     System.out.println(String.format("Killing connection to %s", dInfo));
                     socketConnectionFactory.kill(new SocketInformation(dParts[0], Integer.parseInt(dParts[1])));
-                } catch (Exception e) {
-                    Util.printException("Kill not successful", e);
                 }
+            } catch (Exception e) {
+                Util.printException("Kill not successful", e);
             }
         }
 
