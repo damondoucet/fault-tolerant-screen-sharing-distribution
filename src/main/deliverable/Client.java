@@ -13,6 +13,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
@@ -28,22 +30,27 @@ public class Client {
     private Client(NetworkProtocol networkClient) {
         this.networkClient = networkClient;
         this.slideshowInput = new ConcurrentLinkedQueue<>();
-
         this.networkClient.registerOutputQueue(this.slideshowInput);
+    }
+
+    private static int getRandomFiveDigitNumber() {
+        Random r = new Random( System.currentTimeMillis() );
+        return (1 + r.nextInt(2)) * 10000 + r.nextInt(10000);
+    }
+
+    // turns e.g. "127.0.0.1:5567" into ["127.0.0.1", 5567]
+    private static String[] parseKeyString(String socketInfo) {
+        return socketInfo.split(":");
     }
 
     public void start() {
         System.out.println(networkClient.getParentKeyString());
         slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
-        new Runnable() {
-
-            @Override
-            public void run() {
-                Util.sleepMillis(1000);
-                slideshow.setParentIP(networkClient.getParentKeyString());
-            }
-        }.run();
+        ((Runnable) () -> {
+            Util.sleepMillis(1000);
+            slideshow.setParentIP(networkClient.getParentKeyString());
+        }).run();
     }
 
     public void stop() {
@@ -51,20 +58,27 @@ public class Client {
         slideshow.close();
     }
 
-    private static SocketInformation getBroadcasterSocketInfo() {
-        // TODO(ddoucet)
-        return new SocketInformation("127.0.0.1", 5567);
+    private static SocketInformation getBroadcasterSocketInfo(String ip, int port) {
+        return new SocketInformation(ip, port);
     }
 
-    private static SocketInformation getSocketInfo() throws SocketException {
-        // TODO(ddoucet): need some way to generate ports
-        return new SocketInformation(Util.getIP(LOCAL_MACHINE_ONLY), 11235);
+    private static SocketInformation getSocketInfo(int port) throws SocketException {
+        return new SocketInformation(Util.getIP(LOCAL_MACHINE_ONLY), port);
     }
 
     public static void main(String[] args) throws IOException {
-        SocketInformation broadcasterSocketInfo = getBroadcasterSocketInfo();
+        int port = getRandomFiveDigitNumber();
 
-        SocketConnectionFactory socketConnectionFactory = SocketConnectionFactory.fromSocketInfo(getSocketInfo());
+        // create a scanner so we can read the command-line input
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter broadcaster IP and port (e.g. : '127.0.0.1:5567'): ");
+        String bInfo = scanner.next();
+        String[] bParts = parseKeyString(bInfo);
+        SocketInformation broadcasterSocketInfo = getBroadcasterSocketInfo(bParts[0], Integer.parseInt(bParts[1]));
+        System.out.println(String.format("Connecting from me %s to parent %s", getSocketInfo(port), bInfo));
+
+        SocketConnectionFactory socketConnectionFactory = SocketConnectionFactory.fromSocketInfo(getSocketInfo(port));
 
         // using basic protocol
 //        NetworkProtocol networkClient = BasicNetworkProtocolClient.lossyClient(
@@ -73,31 +87,31 @@ public class Client {
 
         // using tree protocol
         NetworkProtocol networkClient = TreeNetworkProtocol.losslessClient(
-                socketConnectionFactory, getBroadcasterSocketInfo());
+                socketConnectionFactory, broadcasterSocketInfo);
 
         Client client = new Client(networkClient);
         client.start();
 
         Runtime.getRuntime().addShutdownHook(new Thread(client::stop));
 
-        try{
-            BufferedReader br =
-                    new BufferedReader(new InputStreamReader(System.in));
 
-            String input;
+        String input;
 
-            while((input=br.readLine())!=null){
-                // looking for e.g. "kill 127.0.0.1:5567"
-                if (input.startsWith("kill")){
-                    String socketInfo = input.substring(("kill ").length());
-                    String[] parts = socketInfo.split(":");
-                    socketConnectionFactory.kill(new SocketInformation(parts[0], Integer.parseInt(parts[1])));
+        while ((input=scanner.nextLine())!=null) {
+            // looking for e.g. "kill 127.0.0.1:5567"
+            if (input.startsWith("kill")){
+                try {
+                    String dInfo = input.substring(("kill ").length());
+                    String[] dParts = parseKeyString(dInfo);
+                    System.out.println(String.format("Killing connection to %s", dInfo));
+                    socketConnectionFactory.kill(new SocketInformation(dParts[0], Integer.parseInt(dParts[1])));
+                } catch (Exception e) {
+                    Util.printException("Kill not successful", e);
                 }
             }
-
-        }catch(IOException io){
-            io.printStackTrace();
         }
 
     }
+
+
 }
