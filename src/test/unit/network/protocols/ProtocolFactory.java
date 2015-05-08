@@ -37,7 +37,7 @@ public class ProtocolFactory {
     }
 
     public NetworkProtocol createTreeClient(TestConnectionManager manager,
-                                                   String clientKey) {
+                                            String clientKey) {
         manager.onNewClient(clientKey);
         return TreeNetworkProtocol.losslessClient(
                 new TestConnectionFactory(manager, clientKey),

@@ -52,7 +52,6 @@ public class ParentCandidateScanner<TKey> {
                                   TKey currentNodeKey,
                                   TKey parentKey,
                                   Map<TKey, List<TKey>> nodeToChildren) {
-        System.out.printf("%s scanner has %s children\n", currentNodeKey, nodeToChildren.size());
         this.broadcasterKey = broadcasterKey;
         this.parentKey = parentKey;
         this.currentNodeKey = currentNodeKey;

@@ -62,9 +62,14 @@ public abstract class NetworkProtocolClient<TKey> implements NetworkProtocol {
     }
 
     protected void onSnapshot(Snapshot snapshot) {
-        mostRecentSnapshot.set(snapshot);
-        if (queue != null)
-            queue.add(snapshot);
+        mostRecentSnapshot.getAndUpdate(
+                snap -> {
+                    if (snap != null && snapshot.getFrameIndex() <= snap.getFrameIndex())
+                        return snap;
+                    if (queue != null)
+                        queue.add(snapshot);
+                    return snapshot;
+                });
     }
 
     public abstract void insertSnapshot(Snapshot image);

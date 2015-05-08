@@ -40,13 +40,9 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     private final static byte STATE_ACK = 0x78;  // acknowledge receipt of state
 
     // How long to wait between sending states to the parent in ns.
-    private final static long NANO_SEND_STATE_DELAY = 5000000;  // 5ms
+    private final static long NANO_SEND_STATE_DELAY = 100000000;  // 100ms
 
-    // After this many missed pings, consider the connection dead.
-    private final static int MISSED_PING_THRESHOLD = 5;
-
-    private final static long TIMEOUT_MILLIS =
-            NANO_SEND_STATE_DELAY * MISSED_PING_THRESHOLD / 1000000;
+    private final static long TIMEOUT_MILLIS = 1000;
 
     private final boolean isBroadcaster;
     private final Topology<TKey> topology;
@@ -139,6 +135,8 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
 
     private void handleChild(Connection<TKey> child) {
         try {
+            // TODO(ddoucet): automatically send current state of world
+
             InputStream stream = child.getInputStream();
             AtomicBoolean shouldExecute = threadSet.getShouldExecute();
             while (shouldExecute != null && shouldExecute.get()) {
@@ -155,8 +153,9 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 Util.sleepMillis(10);
             }
         } catch (Exception e) {
-            System.out.printf("%s error handling child %s\n",
+            String message = String.format("%s error handling child %s\n",
                     connectionFactory.getKey(), child.getDest());
+            Util.printException(message, e);
         } finally {
             // We don't need to close the connection here; the client list will
             // handle that when we return. We just need to remove the child
@@ -212,7 +211,6 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                 throw new Exception("Unable to find parent to connect to");
         }
 
-        System.out.printf("%s opening with %s\n", connectionFactory.getKey(), parent);
         Connection<TKey> connection = connectionFactory.openConnection(parent);
         parentConnection.set(connection);
         topology.setParent(connection.getDest());
@@ -235,7 +233,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
             scanner = null;  // after we successfully read a byte
 
             if (prefix == Snapshot.SNAPSHOT_PREFIX)
-                onSnapshot(readSnapshot(connection, -1));
+                snapshotQueue.add(readSnapshot(connection, -1));
             else if (prefix == STATE_PREFIX)
                 topology.updateNonDescendantInfo(stream);
             else if (prefix != STATE_ACK)
@@ -245,6 +243,7 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                         prefix,
                         connection.getDest());
         } catch (Exception e) {
+            System.out.println(connectionFactory.getKey() + " closing connection to parent");
             closeParent();
             System.out.printf("%s error reading from parent %s\n",
                     connectionFactory.getKey(), getParentKey());

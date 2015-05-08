@@ -1,5 +1,6 @@
 package main.network.protocols.tree;
 
+import com.google.common.primitives.Bytes;
 import main.util.Serialization;
 
 import java.io.ByteArrayOutputStream;
@@ -104,7 +105,6 @@ public class Topology<TKey> {
 
     public synchronized void updateNonDescendantInfo(InputStream stream)
             throws IOException {
-        // System.out.printf("%s reading nondesc info from parent %s\n", currentNodeKey, parentKey);
         updateEdgeLocked(parentKey, stream);
     }
 
@@ -132,15 +132,21 @@ public class Topology<TKey> {
     private static <TKey> void writeMapToStream(OutputStream stream, Map<TKey, TKey> nodeToParent)
             throws Exception {
         for (TKey node : nodeToParent.keySet()) {
-            System.out.println("serializing");
             stream.write(Serialization.serialize(node));
             stream.write(Serialization.serialize(nodeToParent.get(node)));
         }
     }
 
-    private static <TKey> void writeMapsToStream(OutputStream stream, Collection<Map<TKey, TKey>> maps)
+    private void writeMapsToStream(OutputStream stream, Collection<Map<TKey, TKey>> maps)
             throws Exception {
-        Serialization.writeLong(stream, totalNodes(maps));
+        if (broadcasterKey.equals(currentNodeKey))
+            Serialization.writeLong(stream, totalNodes(maps));
+        else {
+            Serialization.writeLong(stream, totalNodes(maps) + 1);
+            stream.write(Serialization.serialize(currentNodeKey));
+            stream.write(Serialization.serialize(parentKey));
+        }
+
         for (Map<TKey, TKey> map : maps)
             writeMapToStream(stream, map);
     }

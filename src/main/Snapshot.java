@@ -95,6 +95,12 @@ public class Snapshot {
     }
 
     @Override
+    public String toString() {
+        return String.format("<frame=%s, width=%s, height=%s>",
+                frameIndex, image.getWidth(), image.getHeight());
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj == null || getClass() != obj.getClass())
             return false;
