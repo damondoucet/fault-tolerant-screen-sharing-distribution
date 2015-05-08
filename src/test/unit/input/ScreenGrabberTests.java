@@ -21,7 +21,7 @@ public class ScreenGrabberTests {
     @Test
     public void TestFPS() throws AWTException {
         ConcurrentLinkedQueue<Snapshot> buffer = new ConcurrentLinkedQueue<>();
-        int[] fpsValues = {1, 10, 20, 30};
+        int[] fpsValues = {1, 10, 15};
         int testDurationSecs = 2;
         for (int fps : fpsValues) {
             ScreenGrabber grabber = ScreenGrabber.fromQueueAndFrequency(buffer, fps);
