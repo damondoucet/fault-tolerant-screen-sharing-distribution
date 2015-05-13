@@ -88,7 +88,6 @@ public class DrawingFrame extends JFrame {
      * Creates our graphics-handling component.
      */
     protected void createCanvas() {
-        System.out.println("Calling create canvas");
         canvas = new JComponent() {
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);

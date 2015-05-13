@@ -35,8 +35,8 @@ public class Util {
 
     public static void printException(String message, Exception e) {
         System.out.println(message);
-        System.out.println(e);
-        e.printStackTrace();
+        // System.out.println(e);
+        // e.printStackTrace();
     }
 
     // TODO(ddoucet): This only works on MIT networks LOL
