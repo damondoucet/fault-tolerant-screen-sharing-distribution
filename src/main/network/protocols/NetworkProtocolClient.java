@@ -5,11 +5,8 @@ import main.network.Connection;
 import main.network.ConnectionFactory;
 import main.util.Util;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**

@@ -3,7 +3,6 @@ package main.network;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -16,7 +15,7 @@ public class SocketConnectionFactory implements ConnectionFactory<SocketInformat
     private final ServerSocket serverSocket;
 
     // you can once a SocketInfo is added, it is never removed. aka, you can only connect with a given SocketInfo once
-    private ConcurrentHashMap<SocketInformation, SocketConnection> connections;
+    private final ConcurrentHashMap<SocketInformation, SocketConnection> connections;
 
     // Avoid throwing exceptions in constructors
     private SocketConnectionFactory(SocketInformation info,

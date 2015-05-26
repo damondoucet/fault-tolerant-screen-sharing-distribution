@@ -71,10 +71,6 @@ public class RateLimitSchedule {
         this.schedule = schedule;
     }
 
-    public int getNumRounds() {
-        return schedule.size();
-    }
-
     /**
      * Initialize the rate limit between any pair of the given clients to the
      * default rate.

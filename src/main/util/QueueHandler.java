@@ -21,10 +21,6 @@ public class QueueHandler<T> {
                 null);
     }
 
-    public QueueHandler(Consumer<T> consumer) {
-        this(new ConcurrentLinkedQueue<T>(), consumer);
-    }
-
     private void maybeHandleEntry() {
         T next = queue.poll();
         if (next != null)

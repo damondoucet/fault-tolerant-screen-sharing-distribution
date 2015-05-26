@@ -44,12 +44,12 @@ public class Client {
         System.out.println(networkClient.getParentKeyString());
         slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
-        (new Thread(((Runnable) () -> {
+        (new Thread(() -> {
             while (true) {
                 Util.sleepMillis(3000);
                 slideshow.setParentAddress(networkClient.getParentKeyString());
             }
-        }))).start();
+        })).start();
     }
 
     public void stop() {

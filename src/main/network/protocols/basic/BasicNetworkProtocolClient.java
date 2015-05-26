@@ -9,7 +9,6 @@ import main.util.Serialization;
 import main.util.Util;
 import main.network.protocols.NetworkProtocol;
 
-import java.io.IOException;
 import java.util.Arrays;
 
 /**

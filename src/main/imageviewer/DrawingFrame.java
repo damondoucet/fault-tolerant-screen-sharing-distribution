@@ -14,7 +14,7 @@ import java.io.File;
  * Adapted from Chris Bailey-Kellogg, Dartmouth CS 10, Winter 2014
  */
 public class DrawingFrame extends JFrame {
-    private static Font font = new Font("Arial", Font.BOLD, 24);
+    private static final Font font = new Font("Arial", Font.BOLD, 24);
 
     public JComponent canvas;						// handles graphics display
     public BufferedImage image;						// what to draw by default

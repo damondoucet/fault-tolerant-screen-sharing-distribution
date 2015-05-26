@@ -10,7 +10,7 @@ import java.util.List;
  * be sent (each snapshot represents a round), and the failure schedule.
  */
 public class Input {
-    public static String BROADCASTER = "broadcaster";
+    public final static String BROADCASTER = "broadcaster";
 
     public final String name;
     public final int numRounds;

@@ -1,10 +1,8 @@
 package main.network.protocols.tree;
 
-import com.google.common.primitives.Bytes;
 import main.util.Serialization;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
@@ -130,7 +128,7 @@ public class Topology<TKey> {
     }
 
     // Should only be called while this is locked.
-    private void updateEdgeLocked(TKey edge, InputStream stream) throws IOException, Exception {
+    private void updateEdgeLocked(TKey edge, InputStream stream) throws Exception {
         Map<TKey, TKey> nodeToParent = new HashMap<>();
 
         long numNodes = Serialization.readLong(stream);
@@ -147,7 +145,7 @@ public class Topology<TKey> {
 
     private static <TKey> int totalNodes(Collection<Map<TKey, TKey>> maps) {
         return maps.stream()
-                .mapToInt(map -> map.size()).sum();
+                .mapToInt(Map::size).sum();
     }
 
     private static <TKey> void writeMapToStream(OutputStream stream, Map<TKey, TKey> nodeToParent)
@@ -179,7 +177,7 @@ public class Topology<TKey> {
 
         List<Map<TKey, TKey>> maps = destToNodeToParent.entrySet().stream()
                 .filter(entry -> !entry.getKey().equals(edge))
-                .map(entry -> entry.getValue())
+                .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
         writeMapsToStream(baos, maps);
 

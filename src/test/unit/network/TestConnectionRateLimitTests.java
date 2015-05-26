@@ -4,7 +4,6 @@ import com.google.common.primitives.Bytes;
 import main.network.test.TestConnectionFactory;
 import main.network.test.TestConnectionManager;
 import main.util.Serialization;
-import main.util.Util;
 import org.junit.Test;
 
 import java.io.IOException;

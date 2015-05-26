@@ -10,7 +10,6 @@ import main.util.InterruptableThreadSet;
 import main.util.Serialization;
 import main.util.Util;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
@@ -244,7 +243,6 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
     }
 
     private void readFromParent() {
-        String parentKey = getParentKeyString();
         try {
             // Normally, this would be unsafe, but we're the only thread that
             // would set parentConnection to a non-null value so it's safe in
@@ -272,8 +270,6 @@ public class TreeNetworkProtocol<TKey> extends NetworkProtocolClient<TKey> {
                         connection.getDest());
         } catch (Exception e) {
             closeParent();
-            System.out.printf("%s error reading from parent %s\n",
-                    connectionFactory.getKey(), parentKey);
         }
     }
 

@@ -19,11 +19,8 @@ public class SocketInformation {
         if (!(o instanceof SocketInformation)) return false;
 
         SocketInformation that = (SocketInformation) o;
-
-        if (port != that.port) return false;
-        if (ip != null ? !ip.equals(that.ip) : that.ip != null) return false;
-
-        return true;
+        return port == that.port &&
+                ip.equals(that.ip);
     }
 
     @Override

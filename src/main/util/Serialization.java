@@ -18,8 +18,6 @@ import static com.google.common.base.Preconditions.checkArgument;
  * protocols).
  */
 public class Serialization {
-    private static Charset charset = Charset.forName("UTF-8");
-
     private Serialization() {}
 
     public static int read(InputStream inputStream, byte[] bytes, int numBytes) throws IOException {
@@ -73,7 +71,7 @@ public class Serialization {
         throw new NotImplementedException();
     }
 
-    public static <T> byte[] serialize(T obj) throws Exception {
+    public static <T> byte[] serialize(T obj) {
         if (obj.getClass().equals(String.class)) {
             return writeObj(obj, Serialization::stringToStream);
         } else if (obj.getClass().equals(SocketInformation.class))

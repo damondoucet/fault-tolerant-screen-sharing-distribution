@@ -40,7 +40,7 @@ public class Runner {
         this.createClient = createClient;
         this.input = input;
         this.schedule = new RateLimitSchedule(manager, input.schedule);
-        this.builder = new ResultSetBuilder(input.clients.size());
+        this.builder = new ResultSetBuilder<>(input.clients.size());
         this.image = ImageUtil.createImage1();
         this.currentRound = new AtomicInteger();
     }

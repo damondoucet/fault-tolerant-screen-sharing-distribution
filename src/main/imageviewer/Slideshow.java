@@ -18,10 +18,9 @@ public class Slideshow extends DrawingFrame {
 
     public Slideshow(ConcurrentLinkedQueue<Snapshot> images, String source) {
         super("Slideshow", getStartingImage(), 600, 300, source);
-        ConcurrentLinkedQueue<Snapshot> slides = images;
 
         queueHandler = new QueueHandler<>(
-                slides,
+                images,
                 (snapshot) -> advance(snapshot.getImage()));
         queueHandler.start();
     }

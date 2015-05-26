@@ -6,7 +6,6 @@ import main.input.ScreenGrabber;
 import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;
 import main.network.protocols.NetworkProtocol;
-import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
 import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.QueueHandler;
 import main.util.Util;

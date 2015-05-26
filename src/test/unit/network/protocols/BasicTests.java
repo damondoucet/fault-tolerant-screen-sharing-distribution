@@ -1,11 +1,6 @@
 package test.unit.network.protocols;
 
 import main.util.Util;
-import main.network.protocols.NetworkProtocol;
-import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
-import main.network.protocols.basic.BasicNetworkProtocolClient;
-import main.network.test.TestConnectionFactory;
-import main.network.test.TestConnectionManager;
 import org.junit.Test;
 
 import java.util.function.Consumer;

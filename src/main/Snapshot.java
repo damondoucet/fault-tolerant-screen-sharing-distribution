@@ -3,7 +3,6 @@ package main;
 import com.google.common.primitives.Longs;
 import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream;
 import main.util.Serialization;
-import main.util.Util;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -113,7 +112,7 @@ public class Snapshot {
     public static boolean imagesEqual(BufferedImage lhs, BufferedImage rhs) {
         if ((lhs == null) ^ (rhs == null))
             return false;
-        if (lhs == null && rhs == null)
+        if (lhs == null)
             return true;
 
         int width = lhs.getWidth(), height = lhs.getHeight();

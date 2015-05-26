@@ -3,14 +3,11 @@ package main.util;
 import main.network.Connection;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.concurrent.*;
-
-import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Static utility functions.

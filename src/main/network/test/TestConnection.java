@@ -32,7 +32,7 @@ public class TestConnection implements Connection<String> {
             Byte value;
             while ((value = readQueue.poll()) == null && !closed.get())
                 Util.sleepMillis(10);
-            if (closed.get())
+            if (closed.get() || value == null)
                 throw new IOException("Stream closed");
 
             return value & 0xff;

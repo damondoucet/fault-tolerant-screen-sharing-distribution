@@ -31,7 +31,7 @@ public class TreeTests {
     private void assertCorrectParent(String expectedParent, NetworkProtocol node) {
         TreeNetworkProtocol<String> castedNode =
                 (TreeNetworkProtocol<String>)node;
-        assertEquals(expectedParent.toString(), castedNode.getParentKeyString());
+        assertEquals(expectedParent, castedNode.getParentKeyString());
     }
 
     @Test
