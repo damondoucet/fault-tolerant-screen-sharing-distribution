@@ -32,7 +32,11 @@ public class ImageDisplay extends JFrame {
     private int height;
     private String parentAddress;
 
-    public ImageDisplay(ConcurrentLinkedQueue<Snapshot> images, String source) {
+    public ImageDisplay(
+            String title,
+            ConcurrentLinkedQueue<Snapshot> images,
+            String source) {
+        setTitle(title);
         this.width = WIDTH;
         this.height = HEIGHT;
         this.parentAddress = source;

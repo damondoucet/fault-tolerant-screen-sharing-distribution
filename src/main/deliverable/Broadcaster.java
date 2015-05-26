@@ -44,14 +44,13 @@ public class Broadcaster {
                     } else {
                         networkBroadcaster.insertSnapshot(snapshot);
                     }
-
                 });
     }
 
     public void start() {
         grabber.startCapture();
         queueHandler.start();
-        imageDisplay = new ImageDisplay(slideshowInput, networkBroadcaster.getParentKeyString());
+        imageDisplay = new ImageDisplay("Broadcaster", slideshowInput, networkBroadcaster.getParentKeyString());
         networkBroadcaster.start();
     }
 

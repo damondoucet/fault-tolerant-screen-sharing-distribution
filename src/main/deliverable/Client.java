@@ -39,9 +39,12 @@ public class Client {
         return socketInfo.split(":");
     }
 
-    public void start() {
+    public void start(SocketInformation me) {
         System.out.println(networkClient.getParentKeyString());
-        imageDisplay = new ImageDisplay(slideshowInput, networkClient.getParentKeyString());
+        imageDisplay = new ImageDisplay(
+                "Client at " + me.toString(),
+                slideshowInput,
+                networkClient.getParentKeyString());
         networkClient.start();
         (new Thread(() -> {
             while (true) {
@@ -66,6 +69,7 @@ public class Client {
 
     public static void main(String[] args) throws IOException {
         int port = getRandomFiveDigitNumber();
+        SocketInformation info = getSocketInfo(port);
 
         // create a scanner so we can read the command-line input
         Scanner scanner = new Scanner(System.in);
@@ -74,9 +78,9 @@ public class Client {
         String bInfo = scanner.next();
         String[] bParts = parseKeyString(bInfo);
         SocketInformation broadcasterSocketInfo = getBroadcasterSocketInfo(bParts[0], Integer.parseInt(bParts[1]));
-        System.out.println(String.format("Connecting from me %s to parent %s", getSocketInfo(port), bInfo));
+        System.out.println(String.format("Connecting from me %s to parent %s", info, bInfo));
 
-        SocketConnectionFactory socketConnectionFactory = SocketConnectionFactory.fromSocketInfo(getSocketInfo(port));
+        SocketConnectionFactory socketConnectionFactory = SocketConnectionFactory.fromSocketInfo(info);
 
         // using basic protocol
 //        NetworkProtocol networkClient = BasicNetworkProtocolClient.lossyClient(
@@ -88,7 +92,7 @@ public class Client {
                 socketConnectionFactory, broadcasterSocketInfo);
 
         Client client = new Client(networkClient);
-        client.start();
+        client.start(info);
 
         Runtime.getRuntime().addShutdownHook(new Thread(client::stop));
 
