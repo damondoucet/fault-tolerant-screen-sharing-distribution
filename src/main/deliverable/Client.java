@@ -21,7 +21,7 @@ public class Client {
 
     private final NetworkProtocol networkClient;
     private final ConcurrentLinkedQueue<Snapshot> slideshowInput;
-    private Slideshow slideshow;
+    private ImageDisplay imageDisplay;
 
     private Client(NetworkProtocol networkClient) {
         this.networkClient = networkClient;
@@ -41,19 +41,19 @@ public class Client {
 
     public void start() {
         System.out.println(networkClient.getParentKeyString());
-        slideshow = new Slideshow(slideshowInput, networkClient.getParentKeyString());
+        imageDisplay = new ImageDisplay(slideshowInput, networkClient.getParentKeyString());
         networkClient.start();
         (new Thread(() -> {
             while (true) {
                 Util.sleepMillis(3000);
-                slideshow.setParentAddress(networkClient.getParentKeyString());
+                imageDisplay.setParentAddress(networkClient.getParentKeyString());
             }
         })).start();
     }
 
     public void stop() {
         networkClient.stop();
-        slideshow.close();
+        imageDisplay.close();
     }
 
     private static SocketInformation getBroadcasterSocketInfo(String ip, int port) {

@@ -1,7 +1,7 @@
 package test.unit.deliverable;
 
 import main.Snapshot;
-import main.deliverable.Slideshow;
+import main.deliverable.ImageDisplay;
 import main.deliverable.ScreenGrabber;
 import main.util.Util;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class ImageViewerTests {
         int testDuration = 5000;
 
         grabber.startCapture();
-        Slideshow test = new Slideshow(buffer, "127.0.0.1");
+        ImageDisplay test = new ImageDisplay(buffer, "127.0.0.1");
         Util.sleepMillis(testDuration);
 
         grabber.endCapture();

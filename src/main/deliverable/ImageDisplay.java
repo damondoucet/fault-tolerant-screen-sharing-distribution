@@ -1,48 +1,56 @@
 package main.deliverable;
-import javax.imageio.ImageIO;
+import main.Snapshot;
+import main.util.QueueHandler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * A simple JFrame containing a single component for drawing in (via the draw method)
- * Allows setting of a default image to be drawn if the draw method is not overridden.
- *
- * Adapted from Chris Bailey-Kellogg, Dartmouth CS 10, Winter 2014
+ * Basic slide show app, very loosely adapted from Chris Bailey-Kellogg app
+ * from Dartmouth CS.
  */
-public class DrawingFrame extends JFrame {
+public class ImageDisplay extends JFrame {
+    private final static int WIDTH = 600;
+    private final static int HEIGHT = 300;
+
+    private final QueueHandler<Snapshot> queueHandler;
+
+    private static BufferedImage getStartingImage() {
+        return new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
+    }
+
     private static final Font font = new Font("Arial", Font.BOLD, 24);
 
-    public JComponent canvas;						// handles graphics display
-    public BufferedImage image;						// what to draw by default
-    public int width;
-    public int height;
-    public String parentAddress;
+    private final JComponent canvas;					// handles graphics display
+    private BufferedImage image;						// what to draw by default
+    private int width;
+    private int height;
+    private String parentAddress;
 
-    /**
-     * An image-ful canvas, with a preloaded image
-     *
-     * @param title		displayed in window title bar
-     * @param image
-     */
-    public DrawingFrame(String title, BufferedImage image, int width, int height, String parentIP) {
-        super(title);
-        this.width = width;
-        this.height = height;
-        this.parentAddress = parentIP;
-        createCanvas();
+    public ImageDisplay(ConcurrentLinkedQueue<Snapshot> images, String source) {
+        this.width = WIDTH;
+        this.height = HEIGHT;
+        this.parentAddress = source;
+        canvas = createCanvas();
         finishGUI(width, height);
-        setImage(image);
+        setImage(getStartingImage());
+
+        queueHandler = new QueueHandler<>(
+                images,
+                (snapshot) -> setImage(snapshot.getImage()));
+        queueHandler.start();
     }
 
     /**
      * Creates our graphics-handling component.
      */
-    protected void createCanvas() {
-        canvas = new JComponent() {
+    private JComponent createCanvas() {
+        JComponent canvas = new JComponent() {
             public void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 draw(g);
@@ -55,6 +63,7 @@ public class DrawingFrame extends JFrame {
                 setHeight(e.getComponent().getHeight());
             }
         });
+        return canvas;
     }
 
     private void setWidth(int width) {
@@ -63,10 +72,6 @@ public class DrawingFrame extends JFrame {
 
     private void setHeight(int height) {
         this.height = height;
-    }
-
-    protected void setParentAddress(String ip) {
-        this.parentAddress = ip;
     }
 
     /**
@@ -101,13 +106,6 @@ public class DrawingFrame extends JFrame {
     }
 
     /**
-     * Gets the default image
-     */
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    /**
      * Sets the default image
      *
      * @param image
@@ -115,5 +113,13 @@ public class DrawingFrame extends JFrame {
     public void setImage(BufferedImage image) {
         this.image = image;
         repaint();
+    }
+
+    public void close() {
+        queueHandler.stop();
+    }
+
+    public void setParentAddress(String ipAddr) {
+        this.parentAddress = ipAddr;
     }
 }

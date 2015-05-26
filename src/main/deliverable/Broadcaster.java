@@ -26,7 +26,7 @@ public class Broadcaster {
     private final ConcurrentLinkedQueue<Snapshot> slideshowInput;
     private final QueueHandler<Snapshot> queueHandler;
 
-    private Slideshow slideshow;
+    private ImageDisplay imageDisplay;
 
     private Broadcaster(ScreenGrabber grabber,
                        ConcurrentLinkedQueue<Snapshot> grabberOutput,
@@ -51,14 +51,14 @@ public class Broadcaster {
     public void start() {
         grabber.startCapture();
         queueHandler.start();
-        slideshow = new Slideshow(slideshowInput, networkBroadcaster.getParentKeyString());
+        imageDisplay = new ImageDisplay(slideshowInput, networkBroadcaster.getParentKeyString());
         networkBroadcaster.start();
     }
 
     public void stop() {
         grabber.endCapture();
         queueHandler.stop();
-        slideshow.close();
+        imageDisplay.close();
         networkBroadcaster.stop();
     }
 
