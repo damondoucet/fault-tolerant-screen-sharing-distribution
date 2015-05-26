@@ -1,4 +1,4 @@
-package main.input;
+package main.deliverable;
 
 import main.Snapshot;
 import main.util.Util;
