@@ -1,8 +1,8 @@
 package main.deliverable;
 
 import main.Snapshot;
-import main.network.SocketConnectionFactory;
-import main.network.SocketInformation;
+import main.network.connections.socket.SocketConnectionFactory;
+import main.network.connections.socket.SocketInformation;
 import main.network.protocols.NetworkProtocol;
 import main.network.protocols.tree.TreeNetworkProtocol;
 import main.util.Util;

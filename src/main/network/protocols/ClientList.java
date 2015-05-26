@@ -1,6 +1,7 @@
-package main.network;
+package main.network.protocols;
 
 import main.Snapshot;
+import main.network.connections.Connection;
 import main.util.Util;
 
 import java.io.IOException;

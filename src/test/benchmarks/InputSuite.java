@@ -1,6 +1,6 @@
 package test.benchmarks;
 
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionManager;
 import org.junit.Before;
 import org.junit.Test;
 import test.unit.network.protocols.ProtocolFactory;

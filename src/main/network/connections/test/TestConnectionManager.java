@@ -1,6 +1,6 @@
-package main.network.test;
+package main.network.connections.test;
 
-import main.network.Connection;
+import main.network.connections.Connection;
 import main.util.Util;
 
 import java.io.IOException;

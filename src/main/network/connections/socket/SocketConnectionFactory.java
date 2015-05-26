@@ -1,4 +1,7 @@
-package main.network;
+package main.network.connections.socket;
+
+import main.network.connections.Connection;
+import main.network.connections.ConnectionFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;

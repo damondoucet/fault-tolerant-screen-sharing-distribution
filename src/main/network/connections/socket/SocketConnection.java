@@ -1,5 +1,6 @@
-package main.network;
+package main.network.connections.socket;
 
+import main.network.connections.Connection;
 import main.util.Serialization;
 
 import java.io.IOException;

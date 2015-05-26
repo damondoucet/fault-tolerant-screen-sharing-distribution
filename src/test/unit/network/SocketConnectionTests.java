@@ -1,7 +1,7 @@
 package test.unit.network;
 
-import main.network.SocketConnectionFactory;
-import main.network.SocketInformation;
+import main.network.connections.socket.SocketConnectionFactory;
+import main.network.connections.socket.SocketInformation;
 import org.junit.Test;
 
 import java.io.IOException;

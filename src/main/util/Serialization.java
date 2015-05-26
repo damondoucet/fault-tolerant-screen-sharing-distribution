@@ -2,11 +2,10 @@ package main.util;
 
 import com.google.common.base.Charsets;
 import com.google.common.primitives.Longs;
-import main.network.SocketInformation;
+import main.network.connections.socket.SocketInformation;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;

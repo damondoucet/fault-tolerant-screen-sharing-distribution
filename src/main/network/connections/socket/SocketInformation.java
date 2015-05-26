@@ -1,4 +1,4 @@
-package main.network;
+package main.network.connections.socket;
 
 /**
  * Immutable structure that holds IP and port. Represents the key for a

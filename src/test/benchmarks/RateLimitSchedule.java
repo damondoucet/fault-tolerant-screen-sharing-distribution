@@ -1,6 +1,6 @@
 package test.benchmarks;
 
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionManager;
 
 import java.util.ArrayList;
 import java.util.List;

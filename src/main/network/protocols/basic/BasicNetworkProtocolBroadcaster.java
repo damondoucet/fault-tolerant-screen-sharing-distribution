@@ -3,8 +3,8 @@ package main.network.protocols.basic;
 import main.network.protocols.NetworkProtocolClient;
 import main.util.InterruptableThreadSet;
 import main.Snapshot;
-import main.network.ClientList;
-import main.network.ConnectionFactory;
+import main.network.protocols.ClientList;
+import main.network.connections.ConnectionFactory;
 
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;

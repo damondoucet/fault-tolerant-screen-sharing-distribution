@@ -1,8 +1,8 @@
 package test.unit.network;
 
 import com.google.common.primitives.Bytes;
-import main.network.test.TestConnectionFactory;
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionFactory;
+import main.network.connections.test.TestConnectionManager;
 import main.util.Serialization;
 import org.junit.Test;
 

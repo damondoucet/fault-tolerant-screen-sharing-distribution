@@ -1,7 +1,7 @@
 package test.unit.network;
 
-import main.network.Connection;
-import main.network.ConnectionFactory;
+import main.network.connections.Connection;
+import main.network.connections.ConnectionFactory;
 import main.util.Util;
 
 import java.io.IOException;

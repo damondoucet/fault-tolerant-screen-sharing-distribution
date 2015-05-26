@@ -4,8 +4,8 @@ import main.network.protocols.NetworkProtocol;
 import main.network.protocols.basic.BasicNetworkProtocolBroadcaster;
 import main.network.protocols.basic.BasicNetworkProtocolClient;
 import main.network.protocols.tree.TreeNetworkProtocol;
-import main.network.test.TestConnectionFactory;
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionFactory;
+import main.network.connections.test.TestConnectionManager;
 
 /**
  * Creates network protocol clients for testing.

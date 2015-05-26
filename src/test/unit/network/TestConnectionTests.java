@@ -1,7 +1,7 @@
 package test.unit.network;
 
-import main.network.test.TestConnectionFactory;
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionFactory;
+import main.network.connections.test.TestConnectionManager;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

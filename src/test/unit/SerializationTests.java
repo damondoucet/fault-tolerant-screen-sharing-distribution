@@ -1,6 +1,6 @@
 package test.unit;
 
-import main.network.SocketInformation;
+import main.network.connections.socket.SocketInformation;
 import main.util.Serialization;
 import org.junit.Test;
 

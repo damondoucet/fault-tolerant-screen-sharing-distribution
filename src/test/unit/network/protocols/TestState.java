@@ -2,7 +2,7 @@ package test.unit.network.protocols;
 
 import main.Snapshot;
 import main.network.protocols.NetworkProtocol;
-import main.network.test.TestConnectionManager;
+import main.network.connections.test.TestConnectionManager;
 import main.util.Util;
 import test.unit.ImageUtil;
 

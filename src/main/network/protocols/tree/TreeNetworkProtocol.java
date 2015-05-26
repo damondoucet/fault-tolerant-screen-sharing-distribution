@@ -1,9 +1,9 @@
 package main.network.protocols.tree;
 
 import main.Snapshot;
-import main.network.ClientList;
-import main.network.Connection;
-import main.network.ConnectionFactory;
+import main.network.protocols.ClientList;
+import main.network.connections.Connection;
+import main.network.connections.ConnectionFactory;
 import main.network.protocols.NetworkProtocol;
 import main.network.protocols.NetworkProtocolClient;
 import main.util.InterruptableThreadSet;

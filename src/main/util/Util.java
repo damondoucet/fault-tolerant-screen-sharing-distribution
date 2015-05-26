@@ -1,6 +1,6 @@
 package main.util;
 
-import main.network.Connection;
+import main.network.connections.Connection;
 
 import java.io.IOException;
 import java.net.InetAddress;

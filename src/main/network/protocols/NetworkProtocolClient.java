@@ -1,8 +1,8 @@
 package main.network.protocols;
 
 import main.Snapshot;
-import main.network.Connection;
-import main.network.ConnectionFactory;
+import main.network.connections.Connection;
+import main.network.connections.ConnectionFactory;
 import main.util.Util;
 
 import java.util.concurrent.Callable;
