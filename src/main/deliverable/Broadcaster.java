@@ -1,7 +1,6 @@
 package main.deliverable;
 
 import main.Snapshot;
-import main.imageviewer.Slideshow;
 import main.input.ScreenGrabber;
 import main.network.SocketConnectionFactory;
 import main.network.SocketInformation;

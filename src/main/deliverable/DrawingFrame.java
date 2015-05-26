@@ -1,4 +1,4 @@
-package main.imageviewer;
+package main.deliverable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -23,37 +23,6 @@ public class DrawingFrame extends JFrame {
     public String parentAddress;
 
     /**
-     * Just the shell -- need to call finishGUI once the size is known.
-     *
-     * @param title		displayed in window title bar
-     */
-    public DrawingFrame(String title) {
-        super(title);
-        createCanvas();
-    }
-
-    /**
-     * A canvas for the specified image file
-     *
-     * @param title		displayed in window title bar
-     * @param filename	for the image
-     */
-    public DrawingFrame(String title, String filename, int width, int height) {
-        super(title);
-        try {
-            image = ImageIO.read(new File(filename));
-        }
-        catch (Exception e) {
-            System.err.println("Couldn't load image");
-            System.exit(-1);
-        }
-        createCanvas();
-        this.width = width;
-        this.height = height;
-        finishGUI(width, height);
-    }
-
-    /**
      * An image-ful canvas, with a preloaded image
      *
      * @param title		displayed in window title bar
@@ -67,21 +36,6 @@ public class DrawingFrame extends JFrame {
         createCanvas();
         finishGUI(width, height);
         setImage(image);
-    }
-
-    /**
-     * An image-less canvas of the specified size.
-     *
-     * @param title		displayed in window title bar
-     * @param width		window size
-     * @param height	window size
-     */
-    public DrawingFrame(String title, int width, int height) {
-        super(title);
-        createCanvas();
-        this.width = width;
-        this.height = height;
-        finishGUI(width, height);
     }
 
     /**

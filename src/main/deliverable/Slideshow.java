@@ -1,5 +1,6 @@
-package main.imageviewer;
+package main.deliverable;
 import main.Snapshot;
+import main.deliverable.DrawingFrame;
 import main.util.QueueHandler;
 
 import java.awt.image.BufferedImage;
@@ -7,7 +8,8 @@ import java.awt.image.BufferedImage;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Basic slide show app, adapted from Chris Bailey-Kellogg app from Dartmouth CS
+ * Basic slide show app, very loosely adapted from Chris Bailey-Kellogg app
+ * from Dartmouth CS.
  */
 public class Slideshow extends DrawingFrame {
     private final QueueHandler<Snapshot> queueHandler;

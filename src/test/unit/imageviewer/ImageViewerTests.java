@@ -1,7 +1,7 @@
 package test.unit.imageviewer;
 
 import main.Snapshot;
-import main.imageviewer.Slideshow;
+import main.deliverable.Slideshow;
 import main.input.ScreenGrabber;
 import main.util.Util;
 import org.junit.Test;
