@@ -55,7 +55,10 @@ public class Util {
     }
 
     public static String getIP(boolean localMachineOnly) throws SocketException {
-        return localMachineOnly ? "127.0.0.1" : Util.getMITIP();
+        if (localMachineOnly)
+            return "127.0.0.1";
+        String ip = getMITIP();
+        return ip == null ? "127.0.0.1" : ip;
     }
 
     public static <T> T doWithTimeout(Callable<T> callable, long timeoutMillis)
